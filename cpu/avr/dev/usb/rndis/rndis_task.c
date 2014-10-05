@@ -53,7 +53,7 @@
 #include "rndis/rndis_task.h"
 #include "rndis/rndis_protocol.h"
 #if RF230BB
-#include "rf230bb.h"
+#include "rf23x.h"
 #endif
 #include "uip.h"
 #include "sicslow_ethernet.h"

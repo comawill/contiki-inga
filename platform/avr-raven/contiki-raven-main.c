@@ -66,7 +66,7 @@ unsigned char debugflowsize,debugflow[DEBUGFLOWSIZE];
 #include "loader/symtab.h"
 
 #if RF230BB        //radio driver using contiki core mac
-#include "radio/rf230bb/rf230bb.h"
+#include "dev/rf23x/rf23x.h"
 #include "net/mac/frame802154.h"
 #include "net/mac/framer-802154.h"
 #include "net/ipv6/sicslowpan.h"

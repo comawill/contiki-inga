@@ -61,7 +61,7 @@
 
 #include "dev/leds.h"
 #include "dev/spi.h"
-#include "rf230bb.h"
+#include "rf23x.h"
 
 #include "net/packetbuf.h"
 #include "net/rime/rimestats.h"

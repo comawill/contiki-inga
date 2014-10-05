@@ -95,7 +95,7 @@
 #endif
 
 #if RF230BB           //radio driver using contiki core mac
-#include "radio/rf230bb/rf230bb.h"
+#include "dev/rf23x/rf23x.h"
 #include "net/mac/frame802154.h"
 #define UIP_IP_BUF ((struct uip_ip_hdr *)&uip_buf[UIP_LLH_LEN])
 linkaddr_t macLongAddr;

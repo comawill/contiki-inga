@@ -57,7 +57,7 @@
 #include "rndis/rndis_task.h"
 #include "sicslow_ethernet.h"
 #if RF230BB
-#include "rf230bb.h"
+#include "dev/rf23x/rf23x.h"
 #else
 #include "radio.h"
 #endif

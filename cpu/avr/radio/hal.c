@@ -77,7 +77,7 @@ extern uint8_t debugflowsize,debugflow[DEBUGFLOWSIZE];
 #include <avr/io.h>
 #include "atmega128rfa1_registermap.h"
 #else
-#include "at86rf230_registermap.h"
+#include "at86rf23x_registermap.h"
 #endif
 
 /*============================ VARIABLES =====================================*/

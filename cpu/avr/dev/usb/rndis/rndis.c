@@ -73,7 +73,7 @@ RNDIS Status Information:
 #include <avr/pgmspace.h>
 #include <string.h>
 #if RF230BB
-#include "rf230bb.h"
+#include "rf23x.h"
 #endif
 
 #include <stdio.h>

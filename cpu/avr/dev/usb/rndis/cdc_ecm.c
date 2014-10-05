@@ -10,7 +10,7 @@
 #include "sicslow_ethernet.h"
 #include <stdio.h>
 #if RF230BB
-#include "rf230bb.h"
+#include "rf23x.h"
 #endif
 
 #include <avr/pgmspace.h>
