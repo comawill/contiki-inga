@@ -146,7 +146,7 @@ extract_random_bit_() {
 #define BITS_TO_SHIFT		8
 
 #include "radio/hal.h"
-#include "dev/rf23x/at86rf23x_registermap.h"
+#include "dev/rf23x/rf23x_registermap.h"
 
 #ifndef TRX_CTRL_0
 #define TRX_CTRL_0 0x03

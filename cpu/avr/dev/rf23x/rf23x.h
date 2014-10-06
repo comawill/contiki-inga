@@ -55,11 +55,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "radio/hal.h"
-#if defined(__AVR_ATmega128RFA1__)
-#include "atmega128rfa1_registermap.h"
-#else
-#include "at86rf23x_registermap.h"
-#endif
+#include "rf23x_registermap.h"
 
 
 /*============================ MACROS ========================================*/
