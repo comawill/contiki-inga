@@ -1,10 +1,10 @@
 ### The RF230 "bare bones" driver uses the core MAC layer.
 ### It is required for versions after contiki 2.4 that use the new driver interfaces
 
-ifndef RF230BB
-RF230BB=1
+ifndef RF23X
+RF23X=1
 endif
 CONTIKI_CPU_DIRS           += radio/
 CONTIKI_TARGET_SOURCEFILES += hal.c
-CFLAGS                     += -DRF230BB
+CFLAGS                     += -DRF23X
 MODULES                    += cpu/avr/dev/rf23x

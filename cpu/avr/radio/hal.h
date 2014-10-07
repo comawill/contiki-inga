@@ -394,8 +394,8 @@ void hal_frame_write( uint8_t *write_buffer, uint8_t length );
 void hal_sram_read( uint8_t address, uint8_t length, uint8_t *data );
 void hal_sram_write( uint8_t address, uint8_t length, uint8_t *data );
 /* Number of receive buffers in RAM. */
-#ifndef RF230_CONF_RX_BUFFERS
-#define RF230_CONF_RX_BUFFERS 1
+#ifndef RF23X_CONF_RX_BUFFERS
+#define RF23X_CONF_RX_BUFFERS 1
 #endif
 
 #endif

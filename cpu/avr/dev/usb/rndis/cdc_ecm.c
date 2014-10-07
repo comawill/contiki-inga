@@ -9,9 +9,7 @@
 #include "uip.h"
 #include "sicslow_ethernet.h"
 #include <stdio.h>
-#if RF230BB
 #include "rf23x.h"
-#endif
 
 #include <avr/pgmspace.h>
 #include <util/delay.h>
@@ -193,11 +191,7 @@ cdc_ecm_process(void) {
 		cdc_ecm_notify_connection_speed_change(250000,250000);
 		doInit = 0;
 		if(usb_ecm_packet_filter & PACKET_TYPE_PROMISCUOUS) {
-#if RF230BB
-			rf230_set_promiscuous_mode(true);
-#else		
-			radio_set_trx_state(RX_ON);
-#endif
+			rf23x_set_promiscuous_mode(true);
 		}
 
 		// Select again, just to make sure.

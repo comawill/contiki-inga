@@ -42,8 +42,8 @@
   POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef PHY230_REGISTERMAP_EXTERNAL_H
-#define PHY230_REGISTERMAP_EXTERNAL_H
+#ifndef PHY23X_REGISTERMAP_EXTERNAL_H
+#define PHY23X_REGISTERMAP_EXTERNAL_H
 
 #define HAVE_REGISTER_MAP (1)
 /** Offset for register TRX_STATUS */
@@ -266,7 +266,7 @@
 /** Access parameters for sub-register PART_NUM in register @ref RG_PART_NUM */
 #define SR_PART_NUM                  0x1c, 0xff, 0
 /** Constant RF230 for sub-register @ref SR_PART_NUM */
-#define RF230                    (2)
+#define RF230_CONST                    (2)
 /** Offset for register VERSION_NUM */
 #define RG_VERSION_NUM                   (0x1d)
 /** Access parameters for sub-register VERSION_NUM in register @ref RG_VERSION_NUM */
@@ -351,4 +351,4 @@
 #define SR_I_AM_COORD                0x2e, 0x08, 3
 /** Access parameters for sub-register CSMA_SEED_1 in register @ref RG_CSMA_SEED_1 */
 #define SR_CSMA_SEED_1               0x2e, 0x07, 0
-#endif /* PHY230_REGISTERMAP_EXTERNAL_H */
+#endif /* PHY23X_REGISTERMAP_EXTERNAL_H */

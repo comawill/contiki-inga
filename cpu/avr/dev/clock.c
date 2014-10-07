@@ -88,23 +88,23 @@ volatile unsigned long seconds;
 long sleepseconds;
 
 /* Set RADIOSTATS to monitor radio on time (must also be set in the radio driver) */
-#if RF230BB && AVR_WEBSERVER
+#if RF23X && AVR_WEBSERVER
 #define RADIOSTATS 1
 #endif
 
 #if RADIOSTATS
 static volatile uint8_t rcount;
 volatile unsigned long radioontime;
-extern uint8_t RF230_receive_on;
+extern uint8_t RF23X_receive_on;
 #endif
 
 /* Set RADIO_CONF_CALIBRATE_INTERVAL for periodic calibration of the PLL during extended radio on time.
- * The RF230 data sheet suggests every 5 minutes if the temperature is fluctuating.
+ * The RF23X data sheet suggests every 5 minutes if the temperature is fluctuating.
  * At present the specified interval is ignored, and an 8 bit counter gives 256 second intervals.
  * Actual calibration is done by the driver on the next transmit request.
  */
 #if RADIO_CONF_CALIBRATE_INTERVAL
-extern volatile uint8_t rf230_calibrate;
+extern volatile uint8_t rf23x_calibrate;
 static uint8_t calibrate_interval;
 #endif
 
@@ -298,7 +298,7 @@ clock_adjust_ticks(clock_time_t howmany)
     seconds++;
     sleepseconds++;
 #if RADIOSTATS
-    if (RF230_receive_on) radioontime += 1;
+    if (RF23X_receive_on) radioontime += 1;
 #endif
   }
 #if TWO_COUNTERS
@@ -337,7 +337,7 @@ ISR(AVR_OUTPUT_COMPARE_INT)
 #if RADIO_CONF_CALIBRATE_INTERVAL
    /* Force a radio PLL frequency calibration every 256 seconds */
     if (++calibrate_interval==0) {
-      rf230_calibrate=1;
+      rf23x_calibrate=1;
     }
 #endif
 
@@ -345,7 +345,7 @@ ISR(AVR_OUTPUT_COMPARE_INT)
 
 #if RADIOSTATS
    /* Sample radio on time. Less accurate than ENERGEST but a smaller footprint */
-  if (RF230_receive_on) {
+  if (RF23X_receive_on) {
     if (++rcount >= CLOCK_SECOND) {
       rcount=0;
       radioontime++;

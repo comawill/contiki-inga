@@ -40,7 +40,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  */
 /**
- *    \addtogroup radiorf230
+ *    \addtogroup radiorf23x
  *   @{
  */
 /**
@@ -60,25 +60,25 @@
 
 /*============================ MACROS ========================================*/
 #define SUPPORTED_PART_NUMBER                   ( 2 )
-#define RF230_REVA                              ( 1 )
-#define RF230_REVB                              ( 2 )
+#define RF23X_REVA                              ( 1 )
+#define RF23X_REVB                              ( 2 )
 #define SUPPORTED_MANUFACTURER_ID               ( 31 )
 
 #if defined(__AVR_ATmega128RFA1__)
-#define RF230_SUPPORTED_INTERRUPT_MASK          ( 0xFF )
+#define RF23X_SUPPORTED_INTERRUPT_MASK          ( 0xFF )
 #else
 /* RF230 does not support RX_START interrupts in extended mode, but it seems harmless to always enable it. */
 /* In non-extended mode this allows RX_START to sample the RF rssi at the end of the preamble */
-//#define RF230_SUPPORTED_INTERRUPT_MASK        ( 0x08 )  //enable trx end only
-//#define RF230_SUPPORTED_INTERRUPT_MASK          ( 0x0F ) //disable bat low, trx underrun
-#define RF230_SUPPORTED_INTERRUPT_MASK          ( 0x0C )  //disable bat low, trx underrun, pll lock/unlock
+//#define RF23X_SUPPORTED_INTERRUPT_MASK        ( 0x08 )  //enable trx end only
+//#define RF23X_SUPPORTED_INTERRUPT_MASK          ( 0x0F ) //disable bat low, trx underrun
+#define RF23X_SUPPORTED_INTERRUPT_MASK          ( 0x0C )  //disable bat low, trx underrun, pll lock/unlock
 #endif
 
-#define RF230_MIN_CHANNEL                       ( 11 )
-#define RF230_MAX_CHANNEL                       ( 26 )
-#define RF230_MIN_ED_THRESHOLD                  ( 0 )
-#define RF230_MAX_ED_THRESHOLD                  ( 15 )
-#define RF230_MAX_TX_FRAME_LENGTH               ( 127 ) /**< 127 Byte PSDU. */
+#define RF23X_MIN_CHANNEL                       ( 11 )
+#define RF23X_MAX_CHANNEL                       ( 26 )
+#define RF23X_MIN_ED_THRESHOLD                  ( 0 )
+#define RF23X_MAX_ED_THRESHOLD                  ( 15 )
+#define RF23X_MAX_TX_FRAME_LENGTH               ( 127 ) /**< 127 Byte PSDU. */
 
 #define TX_PWR_3DBM                             ( 0 )
 #define TX_PWR_17_2DBM                          ( 15 )
@@ -188,38 +188,38 @@ typedef void (*radio_rx_callback) (uint16_t data);
 /*	Hook Documentation 
 **	
 **	Sniffing Hooks:
-**		RF230BB_HOOK_TX_PACKET(buffer,total_len)
-**		RF230BB_HOOK_RX_PACKET(buf,len)
+**		RF23X_HOOK_TX_PACKET(buffer,total_len)
+**		RF23X_HOOK_RX_PACKET(buf,len)
 **
-**	RF230BB_HOOK_IS_SEND_ENABLED()
-**	RF230BB_HOOK_RADIO_ON()
-**	RF230BB_HOOK_RADIO_OFF()
+**	RF23X_HOOK_IS_SEND_ENABLED()
+**	RF23X_HOOK_RADIO_ON()
+**	RF23X_HOOK_RADIO_OFF()
 **	
 */
 
 
 /*============================ PROTOTYPES ====================================*/
 
-const struct radio_driver rf230_driver;
+const struct radio_driver rf23x_driver;
 
-int rf230_init(void);
-void rf230_warm_reset(void);
-void rf230_start_sneeze(void);
-void rf230_set_channel(uint8_t channel);
-void rf230_listen_channel(uint8_t channel);
-uint8_t rf230_get_channel(void);
-void rf230_set_pan_addr(unsigned pan,unsigned addr,const uint8_t ieee_addr[8]);
-void rf230_set_txpower(uint8_t power);
-uint8_t rf230_get_txpower(void);
+int rf23x_init(void);
+void rf23x_warm_reset(void);
+void rf23x_start_sneeze(void);
+void rf23x_set_channel(uint8_t channel);
+void rf23x_listen_channel(uint8_t channel);
+uint8_t rf23x_get_channel(void);
+void rf23x_set_pan_addr(unsigned pan,unsigned addr,const uint8_t ieee_addr[8]);
+void rf23x_set_txpower(uint8_t power);
+uint8_t rf23x_get_txpower(void);
 
-void rf230_set_promiscuous_mode(bool isPromiscuous);
-bool rf230_is_ready_to_send();
+void rf23x_set_promiscuous_mode(bool isPromiscuous);
+bool rf23x_is_ready_to_send();
 
-extern uint8_t rf230_last_correlation,rf230_last_rssi,rf230_smallest_rssi;
+extern uint8_t rf23x_last_correlation,rf23x_last_rssi,rf23x_smallest_rssi;
 
-uint8_t rf230_get_raw_rssi(void);
+uint8_t rf23x_get_raw_rssi(void);
 
-#define rf230_rssi	rf230_get_raw_rssi
+#define rf23x_rssi	rf23x_get_raw_rssi
 
 #endif
 /** @} */

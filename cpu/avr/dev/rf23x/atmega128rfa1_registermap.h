@@ -1,6 +1,6 @@
 /**
  * @file
- * @brief This file contains RF230-formatted register definitions for the atmega128rfa1
+ * @brief This file contains RF23X-formatted register definitions for the atmega128rfa1
  */
 /*   Copyright (c) 2008, Swedish Institute of Computer Science
 
@@ -35,7 +35,7 @@
 #ifndef PHY128RFA1_REGISTERMAP_EXTERNAL_H
 #define PHY128RFA1_REGISTERMAP_EXTERNAL_H
 
-/* RF230 register access is through SPI which transfers 8 bits address/8 bits data.
+/* RF23X register access is through SPI which transfers 8 bits address/8 bits data.
  * ATmega128rfa1 registers are defined in I/O space, e.g. in gcc /include/avr/iom128rfa1.h
  * A typical definition is #define TRX_STATUS _SFR_MEM8(0x141)
  * Registers can be read with a macro, but the args for subregisters don't expand properly so the actual address
@@ -84,7 +84,7 @@
 #define SR_AACK_SET_PD         0x16e, 0x20, 5
 
 
-/* RF230 register assignments, for reference */
+/* RF23X register assignments, for reference */
 #if 0
 #define HAVE_REGISTER_MAP (1)
 /** Offset for register TRX_STATUS */
@@ -307,8 +307,8 @@
 #define RG_PART_NUM                      (0x1c)
 /** Access parameters for sub-register PART_NUM in register @ref RG_PART_NUM */
 #define SR_PART_NUM                  0x1c, 0xff, 0
-/** Constant RF230 for sub-register @ref SR_PART_NUM */
-#define RF230                    (2)
+/** Constant RF23X for sub-register @ref SR_PART_NUM */
+#define RF230_CONST                    (2)
 /** Offset for register VERSION_NUM */
 #define RG_VERSION_NUM                   (0x1d)
 /** Access parameters for sub-register VERSION_NUM in register @ref RG_VERSION_NUM */
