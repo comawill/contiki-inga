@@ -79,8 +79,8 @@ extern uint8_t eemem_domain_name[30];
 #else
 #define PARAMS_PANADDR 0
 #endif
-#ifdef RF230_MAX_TX_POWER
-#define PARAMS_TXPOWER RF230_MAX_TX_POWER
+#ifdef RF23X_MAX_TX_POWER
+#define PARAMS_TXPOWER RF23X_MAX_TX_POWER
 #else
 #define PARAMS_TXPOWER 0
 #endif
