@@ -51,18 +51,11 @@
 #define PRINTSHORT(...)
 #endif
 
-#if RF230BB           //radio driver using contiki core mac
-#include "radio/rf230bb/rf230bb.h"
+//radio driver using contiki core mac
+#include "dev/rf23x/rf23x.h"
 #include "net/mac/frame802154.h"
 #include "net/mac/framer-802154.h"
 #include "net/ipv6/sicslowpan.h"
-#else                 //radio driver using Atmel/Cisco 802.15.4'ish MAC
-#include <stdbool.h>
-#include "mac.h"
-#include "sicslowmac.h"
-#include "sicslowpan.h"
-#include "ieee-15-4-manager.h"
-#endif /*RF230BB*/
 
 #include "contiki.h"
 #include "contiki-net.h"
@@ -81,11 +74,7 @@ FUSES =
 		.extended = 0xff,
 	};
 	
-#if RF230BB
 //PROCINIT(&etimer_process, &tcpip_process );
-#else
-PROCINIT(&etimer_process, &mac_process, &tcpip_process );
-#endif
 /* Put default MAC address in EEPROM */
 uint8_t mac_address[8] EEMEM = {0x02, 0x11, 0x22, 0xff, 0xfe, 0x33, 0x44, 0x55};
 
@@ -112,7 +101,6 @@ init_lowlevel(void)
  /* etimers must be started before ctimer_init */
   process_start(&etimer_process, NULL);
   
-#if RF230BB
 
   ctimer_init();
   /* Start radio and radio receive process */
@@ -127,11 +115,11 @@ init_lowlevel(void)
 #if UIP_CONF_IPV6
   memcpy(&uip_lladdr.addr, &addr.u8, 8);
 #endif  
-  rf230_set_pan_addr(IEEE802154_PANID, 0, (uint8_t *)&addr.u8);
+  rf23x_set_pan_addr(IEEE802154_PANID, 0, (uint8_t *)&addr.u8);
 #ifdef CHANNEL_802_15_4
-  rf230_set_channel(CHANNEL_802_15_4);
+  rf23x_set_channel(CHANNEL_802_15_4);
 #else
-  rf230_set_channel(26);
+  rf23x_set_channel(26);
 #endif
 
   linkaddr_set_node_addr(&addr); 
@@ -145,7 +133,7 @@ init_lowlevel(void)
   NETSTACK_NETWORK.init();
 
 #if ANNOUNCE_BOOT
-  printf_P(PSTR("%s %s, channel %u"),NETSTACK_MAC.name, NETSTACK_RDC.name,rf230_get_channel());
+  printf_P(PSTR("%s %s, channel %u"),NETSTACK_MAC.name, NETSTACK_RDC.name, rf23x_get_channel());
   if (NETSTACK_RDC.channel_check_interval) {//function pointer is zero for sicslowmac
     unsigned short tmp;
     tmp=CLOCK_SECOND / (NETSTACK_RDC.channel_check_interval == 0 ? 1:\
@@ -164,12 +152,6 @@ init_lowlevel(void)
 #endif
 
   process_start(&tcpip_process, NULL);
-
-#else
-/* mac process must be started before tcpip process! */
-  process_start(&mac_process, NULL);
-  process_start(&tcpip_process, NULL);
-#endif /*RF230BB*/
 
 }
 
