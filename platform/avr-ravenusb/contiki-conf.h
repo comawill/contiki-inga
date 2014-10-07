@@ -108,11 +108,11 @@ typedef unsigned long off_t;
 /* Simple stack monitor. Status is displayed from the USB menu with 'm' command */
 #define CONFIG_STACK_MONITOR 1
 
-/* RADIO_CONF_CALIBRATE_INTERVAL is used in rf230bb and clock.c. If nonzero a 256 second interval is used */
+/* RADIO_CONF_CALIBRATE_INTERVAL is used in rf23x and clock.c. If nonzero a 256 second interval is used */
 /* Calibration is automatic when the radio wakes so is not necessary when the radio periodically sleeps */
 //#define RADIO_CONF_CALIBRATE_INTERVAL 256
 
-/* RADIOSTATS is used in rf230bb, clock.c and the webserver cgi to report radio usage */
+/* RADIOSTATS is used in rf23x, clock.c and the webserver cgi to report radio usage */
 //#define RADIOSTATS 1
 
 /* Possible watchdog timeouts depend on mcu. Default is WDTO_2S. -1 Disables the watchdog. */
@@ -123,19 +123,7 @@ typedef unsigned long off_t;
 /* ************************************************************************** */
 
 #ifndef USB_ETH_HOOK_IS_READY_FOR_INBOUND_PACKET
-#if RF230BB
-#define	USB_ETH_HOOK_IS_READY_FOR_INBOUND_PACKET()		rf230_is_ready_to_send()
-#else
-static inline uint8_t radio_is_ready_to_send_() {
-	switch(radio_get_trx_state()) {
-		case BUSY_TX:
-		case BUSY_TX_ARET:
-			return 0;
-	}
-	return 1;
-}
-#define	USB_ETH_HOOK_IS_READY_FOR_INBOUND_PACKET()		radio_is_ready_to_send_()
-#endif
+#define	USB_ETH_HOOK_IS_READY_FOR_INBOUND_PACKET()		rf23x_is_ready_to_send()
 #endif
 
 #ifndef USB_ETH_HOOK_HANDLE_INBOUND_PACKET
@@ -143,11 +131,7 @@ static inline uint8_t radio_is_ready_to_send_() {
 #endif
 
 #ifndef USB_ETH_HOOK_SET_PROMISCIOUS_MODE
-#if RF230BB
-#define USB_ETH_HOOK_SET_PROMISCIOUS_MODE(value)	rf230_set_promiscuous_mode(value)
-#else		
-#define USB_ETH_HOOK_SET_PROMISCIOUS_MODE(value)	radio_set_trx_state(value?RX_ON:RX_AACK_ON)
-#endif
+#define USB_ETH_HOOK_SET_PROMISCIOUS_MODE(value)	rf23x_set_promiscuous_mode(value)
 #endif
 
 #ifndef USB_ETH_HOOK_INIT
@@ -155,14 +139,14 @@ static inline uint8_t radio_is_ready_to_send_() {
 #endif
 
 /* ************************************************************************** */
-//#pragma mark RF230BB Hooks
+//#pragma mark RF23X Hooks
 /* ************************************************************************** */
 
-//#define RF230BB_HOOK_RADIO_OFF()	Led1_off()
-//#define RF230BB_HOOK_RADIO_ON()		Led1_on()
-#define RF230BB_HOOK_TX_PACKET(buffer,total_len) mac_log_802_15_4_tx(buffer,total_len)
-#define RF230BB_HOOK_RX_PACKET(buffer,total_len) mac_log_802_15_4_rx(buffer,total_len)
-#define	RF230BB_HOOK_IS_SEND_ENABLED()	mac_is_send_enabled()
+//#define RF23X_HOOK_RADIO_OFF()	Led1_off()
+//#define RF23X_HOOK_RADIO_ON()		Led1_on()
+#define RF23X_HOOK_TX_PACKET(buffer,total_len) mac_log_802_15_4_tx(buffer,total_len)
+#define RF23X_HOOK_RX_PACKET(buffer,total_len) mac_log_802_15_4_rx(buffer,total_len)
+#define	RF23X_HOOK_IS_SEND_ENABLED()	mac_is_send_enabled()
 extern bool mac_is_send_enabled(void);
 extern void mac_log_802_15_4_tx(const uint8_t* buffer, size_t total_len);
 extern void mac_log_802_15_4_rx(const uint8_t* buffer, size_t total_len);
@@ -209,13 +193,9 @@ extern void mac_log_802_15_4_rx(const uint8_t* buffer, size_t total_len);
 /* ************************************************************************** */
 //#pragma mark UIP Settings
 /* ************************************************************************** */
-/* Network setup. The new NETSTACK interface requires RF230BB (as does ip4) */
+/* Network setup. The new NETSTACK interface requires RF23X (as does ip4) */
 /* These mostly have no effect when the Jackdaw is a repeater (CONTIKI_NO_NET=1 using fakeuip.c) */
 
-#if RF230BB
-#else
-#define PACKETBUF_CONF_HDR_SIZE    0         //RF230 combined driver/mac handles headers internally
-#endif /*RF230BB */
 
 #if UIP_CONF_IPV6
 #define LINKADDR_CONF_SIZE       8
@@ -279,46 +259,46 @@ typedef unsigned short uip_stats_t;
 #define NETSTACK_CONF_MAC         nullmac_driver
 #define NETSTACK_CONF_RDC         sicslowmac_driver
 #define NETSTACK_CONF_FRAMER      framer_802154
-#define NETSTACK_CONF_RADIO       rf230_driver
+#define NETSTACK_CONF_RADIO       rf23x_driver
 #define CHANNEL_802_15_4          26
 /* If nonzero an interval of 256 seconds is used at present */
 #define RADIO_CONF_CALIBRATE_INTERVAL 256
 /* AUTOACK receive mode gives better rssi measurements, even if ACK is never requested */
-#define RF230_CONF_AUTOACK        1
+#define RF23X_CONF_AUTOACK        1
 /* Request 802.15.4 ACK on all packets sent by sicslowpan.c (else autoretry) */
 /* Broadcasts will be duplicated by the retry count, since no one will ACK them! */
 #define SICSLOWPAN_CONF_ACK_ALL   0
 /* 1 + Number of auto retry attempts 0-15 (0 implies don't use extended TX_ARET_ON mode with CCA) */
-#define RF230_CONF_FRAME_RETRIES    2
+#define RF23X_CONF_FRAME_RETRIES    2
 /* CCA theshold energy -91 to -61 dBm (default -77). Set this smaller than the expected minimum rssi to avoid packet collisions */
 /* The Jackdaw menu 'm' command is helpful for determining the smallest ever received rssi */
-#define RF230_CONF_CCA_THRES    -85
+#define RF23X_CONF_CCA_THRES    -85
 /* Number of CSMA attempts 0-7. 802.15.4 2003 standard max is 5. */
-#define RF230_CONF_CSMA_RETRIES    5
+#define RF23X_CONF_CSMA_RETRIES    5
 /* Allow sneeze command from jackdaw menu. Useful for testing CCA on other radios */
-/* During sneezing, any access to an RF230 register will hang the MCU and cause a watchdog reset */
-/* The host interface, jackdaw menu and rf230_send routines are temporarily disabled to prevent this */
+/* During sneezing, any access to an RF23X register will hang the MCU and cause a watchdog reset */
+/* The host interface, jackdaw menu and rf23x_send routines are temporarily disabled to prevent this */
 /* But some calls from an internal uip stack might get through, e.g. from CCA or low power protocols, */
 /* as temporarily disabling all the possible accesses would add considerable complication to the radio driver! */
-#define RF230_CONF_SNEEZER        1
+#define RF23X_CONF_SNEEZER        1
 /* Allow 6loWPAN fragmentation (more efficient for large payloads over a reliable channel) */
 #define SICSLOWPAN_CONF_FRAG      1
 /* Timeout for fragment reassembly. A reissued browser GET will also cancel reassembly, typically in 2-3 seconds */
 #define SICSLOWPAN_CONF_MAXAGE    3
 /* Allow sneeze command from jackdaw menu */
-#define RF230_CONF_SNEEZE         1
+#define RF23X_CONF_SNEEZE         1
 
 #elif 1  /* Contiki-mac radio cycling */
 #define NETSTACK_CONF_MAC         nullmac_driver
 //#define NETSTACK_CONF_MAC         csma_driver
 #define NETSTACK_CONF_RDC         contikimac_driver
 #define NETSTACK_CONF_FRAMER      framer_802154
-#define NETSTACK_CONF_RADIO       rf230_driver
+#define NETSTACK_CONF_RADIO       rf23x_driver
 #define CHANNEL_802_15_4          26
 /* Enable extended mode with autoack, but no csma/autoretry */
-#define RF230_CONF_FRAME_RETRIES    1
-#define RF230_CONF_AUTOACK        1
-#define RF230_CONF_CSMA_RETRIES    0
+#define RF23X_CONF_FRAME_RETRIES    1
+#define RF23X_CONF_AUTOACK        1
+#define RF23X_CONF_CSMA_RETRIES    0
 #define SICSLOWPAN_CONF_FRAG      1
 #define SICSLOWPAN_CONF_MAXAGE    3
 /* Jackdaw has USB power, can be always listening */
@@ -350,10 +330,10 @@ typedef unsigned short uip_stats_t;
 //#define NETSTACK_CONF_MAC         csma_driver
 #define NETSTACK_CONF_RDC         cxmac_driver
 #define NETSTACK_CONF_FRAMER      framer_802154
-#define NETSTACK_CONF_RADIO       rf230_driver
+#define NETSTACK_CONF_RADIO       rf23x_driver
 #define CHANNEL_802_15_4          26
-#define RF230_CONF_AUTOACK        1
-#define RF230_CONF_FRAME_RETRIES    1
+#define RF23X_CONF_AUTOACK        1
+#define RF23X_CONF_FRAME_RETRIES    1
 #define SICSLOWPAN_CONF_FRAG      1
 #define SICSLOWPAN_CONF_MAXAGE    3
 #define CXMAC_CONF_ANNOUNCEMENTS    0
@@ -391,14 +371,14 @@ typedef unsigned short uip_stats_t;
 /* Define MAX_*X_POWER to reduce tx power and ignore weak rx packets for testing a miniature multihop network.
  * Leave undefined for full power and sensitivity.
  * tx=0 (3dbm, default) to 15 (-17.2dbm)
- * RF230_CONF_AUTOACK sets the extended mode using the energy-detect register with rx=0 (-91dBm) to 84 (-7dBm)
+ * RF23X_CONF_AUTOACK sets the extended mode using the energy-detect register with rx=0 (-91dBm) to 84 (-7dBm)
  *   else the rssi register is used having range 0 (91dBm) to 28 (-10dBm)
- *   For simplicity RF230_MIN_RX_POWER is based on the energy-detect value and divided by 3 when autoack is not set.
- * On the RF230 a reduced rx power threshold will not prevent autoack if enabled and requested.
+ *   For simplicity RF23X_MIN_RX_POWER is based on the energy-detect value and divided by 3 when autoack is not set.
+ * On the RF23X a reduced rx power threshold will not prevent autoack if enabled and requested.
  * These numbers applied to both Raven and Jackdaw give a maximum communication distance of about 15 cm
- * and a 10 meter range to a full-sensitivity RF230 sniffer.
-#define RF230_MAX_TX_POWER 15
-#define RF230_MIN_RX_POWER 30
+ * and a 10 meter range to a full-sensitivity RF23X sniffer.
+#define RF23X_MAX_TX_POWER 15
+#define RF23X_MIN_RX_POWER 30
  */
 #define UIP_CONF_ROUTER             1
 #define UIP_CONF_ND6_SEND_RA        0
@@ -473,7 +453,7 @@ typedef unsigned short uip_stats_t;
 //#pragma mark Other Settings
 /* ************************************************************************** */
 
-/* Use Atmel 'Route Under MAC', currently just in RF230 sniffer mode! */
+/* Use Atmel 'Route Under MAC', currently just in RF23X sniffer mode! */
 /* Route-Under-MAC uses 16-bit short addresses */
 //#define UIP_CONF_USE_RUM  1
 #if UIP_CONF_USE_RUM

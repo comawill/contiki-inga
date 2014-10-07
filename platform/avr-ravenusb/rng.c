@@ -12,7 +12,7 @@
 #endif
 
 #ifndef RNG_CONF_USE_RADIO_CLOCK
-#define RNG_CONF_USE_RADIO_CLOCK	((!RNG_CONF_USE_ADC) && RF230BB)
+#define RNG_CONF_USE_RADIO_CLOCK	((!RNG_CONF_USE_ADC) && RF23X)
 #endif
 
 /* delay_us uses floating point which includes (in some avr-gcc's) a 256 byte __clz_tab in the RAM through the .data section. */
@@ -129,7 +129,7 @@ extract_random_bit_() {
 **	of two different oscilating crystals. On the RZUSBstick,
 **	there are two such crystals: An 8MHz crystal for the
 **	microcontroller, and a 16MHz crystal and for the radio.
-**	The MCLK pin of the RF230 chip is conveniently connected
+**	The MCLK pin of the RF23X chip is conveniently connected
 **	to pin 6 of port D. First we need to have the radio
 **	output the 16MHz signal (it defaults to 1MHz), and then
 **	we can try to find some noise by sampling pin 6 of port D.
