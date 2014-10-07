@@ -56,7 +56,7 @@
 #include "loader/symtab.h"
 
 #include "params.h"
-#include "radio/rf230bb/rf230bb.h"
+#include "radio/rf23x/rf23x.h"
 #include "net/mac/frame802154.h"
 #include "net/mac/framer-802154.h"
 #include "net/ipv6/sicslowpan.h"
@@ -176,7 +176,7 @@ void initialize(void)
 /* The Raven implements a serial command and data interface via uart0 to a 3290p,
  * which could be duplicated using another host computer.
  */
-#if !RF230BB_CONF_LEDONPORTE1   //Conflicts with USART0
+#if !RF23X_CONF_LEDONPORTE1   //Conflicts with USART0
 #ifdef RAVEN_LCD_INTERFACE
   rs232_init(RS232_PORT_0, USART_BAUD_38400,USART_PARITY_NONE | USART_STOP_BITS_1 | USART_DATA_BITS_8);
   rs232_set_input(0,raven_lcd_serial_input);
@@ -189,7 +189,7 @@ void initialize(void)
   /* Second rs232 port for debugging or slip alternative */
   rs232_init(RS232_PORT_1, USART_BAUD_57600,USART_PARITY_NONE | USART_STOP_BITS_1 | USART_DATA_BITS_8);
   /* Redirect stdout */
-#if RF230BB_CONF_LEDONPORTE1 || defined(RAVEN_LCD_INTERFACE)
+#if RF23X_CONF_LEDONPORTE1 || defined(RAVEN_LCD_INTERFACE)
   rs232_redirect_stdout(RS232_PORT_1);
 #else
   rs232_redirect_stdout(RS232_PORT_0);
@@ -274,9 +274,9 @@ uint8_t i;
 #endif  
   linkaddr_set_node_addr(&addr); 
 
-  rf230_set_pan_addr(params_get_panid(),params_get_panaddr(),(uint8_t *)&addr.u8);
-  rf230_set_channel(params_get_channel());
-  rf230_set_txpower(params_get_txpower());
+  rf23x_set_pan_addr(params_get_panid(),params_get_panaddr(),(uint8_t *)&addr.u8);
+  rf23x_set_channel(params_get_channel());
+  rf23x_set_txpower(params_get_txpower());
 
 #if UIP_CONF_IPV6
   PRINTA("EUI-64 MAC: %x-%x-%x-%x-%x-%x-%x-%x\n",addr.u8[0],addr.u8[1],addr.u8[2],addr.u8[3],addr.u8[4],addr.u8[5],addr.u8[6],addr.u8[7]);
@@ -296,9 +296,9 @@ uint8_t i;
   NETSTACK_NETWORK.init();
 
 #if ANNOUNCE_BOOT
-  PRINTA("%s %s, channel %u , check rate %u Hz tx power %u\n",NETSTACK_MAC.name, NETSTACK_RDC.name, rf230_get_channel(),
+  PRINTA("%s %s, channel %u , check rate %u Hz tx power %u\n",NETSTACK_MAC.name, NETSTACK_RDC.name, rf23x_get_channel(),
     CLOCK_SECOND / (NETSTACK_RDC.channel_check_interval() == 0 ? 1:NETSTACK_RDC.channel_check_interval()),
-    rf230_get_txpower());	  
+    rf23x_get_txpower());
 #if UIP_CONF_IPV6_RPL
   PRINTA("RPL Enabled\n");
 #endif
@@ -384,7 +384,7 @@ uint8_t i;
 #endif
 #endif /* ANNOUNCE_BOOT */
 
-#if RF230BB_CONF_LEDONPORTE1
+#if RF23X_CONF_LEDONPORTE1
   /* NB: PORTE1 conflicts with UART0 */
   DDRE|=(1<<DDE1);  //set led pin to output (Micheal Hatrtman board)
   PORTE&=~(1<<PE1); //and low to turn led off
@@ -431,7 +431,7 @@ main(void)
     /* Turn off LED after a while */
     if (ledtimer) {
       if (--ledtimer==0) {
-#if RF230BB_CONF_LEDONPORTE1
+#if RF23X_CONF_LEDONPORTE1
         PORTE&=~(1<<PE1);
 #endif
 #if defined(RAVEN_LCD_INTERFACE)&&0
@@ -447,21 +447,21 @@ main(void)
  * Set as next statement and step into the routine.
  */
     NETSTACK_RADIO.send(packetbuf_hdrptr(), 42);
-    process_poll(&rf230_process);
+    process_poll(&rf23x_process);
     packetbuf_clear();
-    len = rf230_read(packetbuf_dataptr(), PACKETBUF_SIZE);
+    len = rf23x_read(packetbuf_dataptr(), PACKETBUF_SIZE);
     packetbuf_set_datalen(42);
     NETSTACK_RDC.input();
 #endif
 
 #if 0
-/* Clock.c can trigger a periodic PLL calibration in the RF230BB driver.
+/* Clock.c can trigger a periodic PLL calibration in the RF23X driver.
  * This can show when that happens.
  */
-    extern uint8_t rf230_calibrated;
-    if (rf230_calibrated) {
-      PRINTD("\nRF230 calibrated!\n");
-      rf230_calibrated=0;
+    extern uint8_t rf23x_calibrated;
+    if (rf23x_calibrated) {
+      PRINTD("\nRF23X calibrated!\n");
+      rf23x_calibrated=0;
     }
 #endif
 
@@ -574,21 +574,21 @@ if ((clocktime%STACKMONITOR)==3) {
     }
 #endif /* PERIODICPRINTS */
 
-#if RF230BB&&0
-extern uint8_t rf230processflag;
-    if (rf230processflag) {
-      PRINTF("rf230p%d",rf230processflag);
-      rf230processflag=0;
+#if 0
+extern uint8_t rf23xprocessflag;
+    if (rf23xprocessflag) {
+      PRINTF("rf23xp%d",rf23xprocessflag);
+      rf23xprocessflag=0;
     }
 #endif
 
-#if RF230BB&&0
-extern uint8_t rf230_interrupt_flag;
-    if (rf230_interrupt_flag) {
- //   if (rf230_interrupt_flag!=11) {
-        PRINTF("**RI%u",rf230_interrupt_flag);
+#if 0
+extern uint8_t rf23x_interrupt_flag;
+    if (rf23x_interrupt_flag) {
+ //   if (rf23x_interrupt_flag!=11) {
+        PRINTF("**RI%u",rf23x_interrupt_flag);
  //   }
-      rf230_interrupt_flag=0;
+      rf23x_interrupt_flag=0;
     }
 #endif
   }
