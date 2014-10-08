@@ -111,46 +111,7 @@ volatile extern signed char rf23x_last_rssi;
 				    HAL_SPI_TRANSFER_WAIT(),		\
 				    HAL_SPI_TRANSFER_READ() )
 
-#else /* __AVR__ */
-/*
- * Other SPI architecture (parts to core, parts to m16c6Xp 
- */
-#include "contiki-mulle.h" // MULLE_ENTER_CRITICAL_REGION
-
-// Software SPI transfers
-#define HAL_SPI_TRANSFER_OPEN() { uint8_t spiTemp; \
-  HAL_ENTER_CRITICAL_REGION();	  \
-  HAL_SS_LOW(); /* Start the SPI transaction by pulling the Slave Select low. */
-#define HAL_SPI_TRANSFER_WRITE(to_write) (spiTemp = spiWrite(to_write))
-#define HAL_SPI_TRANSFER_WAIT()  ({0;})
-#define HAL_SPI_TRANSFER_READ() (spiTemp)
-#define HAL_SPI_TRANSFER_CLOSE() \
-    HAL_SS_HIGH(); /* End the transaction by pulling the Slave Select High. */ \
-    HAL_LEAVE_CRITICAL_REGION(); \
-    }
-#define HAL_SPI_TRANSFER(to_write) (spiTemp = spiWrite(to_write))
-
-inline uint8_t spiWrite(uint8_t byte)
-{
-    uint8_t data = 0;
-    uint8_t mask = 0x80;
-    do
-    {
-        if( (byte & mask) != 0 )
-            HAL_PORT_MOSI |= (1 << HAL_MOSI_PIN); //call MOSI.set();
-        else
-            HAL_PORT_MOSI &= ~(1 << HAL_MOSI_PIN); //call MOSI.clr();
-
-        if( (HAL_PORT_MISO & (1 << HAL_MISO_PIN)) > 0) //call MISO.get() )
-            data |= mask;
-
-        HAL_PORT_SCK &= ~(1 << HAL_SCK_PIN); //call SCLK.clr();
-        HAL_PORT_SCK |= (1 << HAL_SCK_PIN); //call SCLK.set();
-    } while( (mask >>= 1) != 0 );
-    return data;
-}
-
-#endif  /* !__AVR__ */
+#endif  /* __AVR__ */
  
 /** \brief  This function initializes the Hardware Abstraction Layer.
  */
@@ -194,48 +155,7 @@ hal_init(void)
     hal_enable_trx_interrupt();
 }
 
-#else /* __AVR__ */
-
-#define HAL_RF23X_ISR() M16C_INTERRUPT(M16C_INT1)
-#define HAL_TIME_ISR()  M16C_INTERRUPT(M16C_TMRB4)
-#define HAL_TICK_UPCNT() (0xFFFF-TB4) // TB4 counts down so we need to convert it to upcounting
-
-void
-hal_init(void)
-{
-    /*Reset variables used in file.*/
-
-    /*IO Specific Initialization - sleep and reset pins. */
-    DDR_SLP_TR |= (1 << SLP_TR); /* Enable SLP_TR as output. */
-    DDR_RST    |= (1 << RST);    /* Enable RST as output. */
-
-    /*SPI Specific Initialization.*/
-    /* Set SS, CLK and MOSI as output. */
-    HAL_DDR_SS  |= (1 << HAL_SS_PIN);
-    HAL_DDR_SCK  |= (1 << HAL_SCK_PIN);
-    HAL_DDR_MOSI  |= (1 << HAL_MOSI_PIN);
-    HAL_DDR_MISO  &= ~(1 << HAL_MISO_PIN);
-
-    /* Set SS */
-    HAL_PORT_SS |= (1 << HAL_SS_PIN); // HAL_SS_HIGH()
-    HAL_PORT_SCK &= ~(1 << HAL_SCK_PIN); // SCLK.clr()
-
-    /*TIMER Specific Initialization.*/
-    // Init count source (Timer B3)
-    TB3 = ((16*10) - 1); // 16 us ticks
-    TB3MR.BYTE = 0b00000000; // Timer mode, F1
-    TBSR.BIT.TB3S = 1; // Start Timer B3
-
-    TB4 = 0xFFFF; //
-    TB4MR.BYTE = 0b10000001; // Counter mode, count TB3
-    TBSR.BIT.TB4S = 1; // Start Timer B4
-    INT1IC.BIT.POL = 1; // Select rising edge
-    HAL_ENABLE_OVERFLOW_INTERRUPT(); /* Enable Timer overflow interrupt. */
-
-    /* Enable interrupts from the radio transceiver. */
-    hal_enable_trx_interrupt();
-}
-#endif  /* !__AVR__ */
+#endif  /* __AVR__ */
 
 
 #if defined(__AVR_ATmega128RFA1__)

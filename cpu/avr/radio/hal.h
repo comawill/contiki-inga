@@ -145,23 +145,6 @@
 #   define SLPTRPORT  TRXPR
 #   define SLPTRPIN   1
 
-#elif CONTIKI_TARGET_MULLE
-/* mulle 5.2 (TODO: move to platform specific) */
-#   define SSPORT     3
-#   define SSPIN      5
-#   define MOSIPORT   1
-#   define MOSIPIN    1
-#   define MISOPORT   1
-#   define MISOPIN    0
-#   define SCKPORT    3
-#   define SCKPIN     3
-#   define RSTPORT    4
-#   define RSTPIN     3
-#   define IRQPORT    8
-#   define IRQPIN     3
-#   define SLPTRPORT  0
-#   define SLPTRPIN   7
-
 #elif PLATFORM_TYPE == IRIS
 /* 1281 IRIS */
 #   define SSPORT     B
@@ -217,13 +200,6 @@
 #define PIN(x)         CAT(PIN,  x)
 #endif
 
-/* TODO: Move to CPU specific */
-#if defined(CONTIKI_TARGET_MULLE)
-#define CAT(x, y)      x##y.BYTE
-#define DDR(x)         CAT(PD,  x)
-#define PORT(x)        CAT(P, x)
-#define PIN(x)         CAT(P, x)
-#endif
 
 /** \} */
 
@@ -306,22 +282,7 @@
     so that interrupts are enabled again.*/
 #define HAL_LEAVE_CRITICAL_REGION( ) SREG = saved_sreg;}
 
-#else /* MULLE */
-
-#define HAL_ENABLE_RADIO_INTERRUPT( ) ( INT1IC.BYTE |= 1 )
-#define HAL_DISABLE_RADIO_INTERRUPT( ) ( INT1IC.BYTE &= ~(1) )
-
-#define HAL_ENABLE_OVERFLOW_INTERRUPT( ) ( TB4IC.BYTE = 1 )
-#define HAL_DISABLE_OVERFLOW_INTERRUPT( ) ( TB4IC.BYTE = 0 )
-
-/** This macro will protect the following code from interrupts.*/
-#define HAL_ENTER_CRITICAL_REGION( ) MULLE_ENTER_CRITICAL_REGION( )
-
-/** This macro must always be used in conjunction with HAL_ENTER_CRITICAL_REGION
-    so that interrupts are enabled again.*/
-#define HAL_LEAVE_CRITICAL_REGION( ) MULLE_LEAVE_CRITICAL_REGION( )
-
-#endif /* !__AVR__ */
+#endif /* __AVR__ */
 
 
 /** \brief  Enable the interrupt from the radio transceiver.
