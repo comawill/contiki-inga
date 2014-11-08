@@ -1,43 +1,44 @@
-/*   Copyright (c) 2008, Swedish Institute of Computer Science
- *  All rights reserved.
+/*
+ * Copyright (c) 2008, Swedish Institute of Computer Science
+ * All rights reserved.
  *
  *  Additional fixes for AVR contributed by:
  *
- *	Colin O'Flynn coflynn@newae.com
- *	Eric Gnoske egnoske@gmail.com
- *	Blake Leverett bleverett@gmail.com
- *	Mike Vidales mavida404@gmail.com
- *	Kevin Brown kbrown3@uccs.edu
- *	Nate Bohlmann nate@elfwerks.com
+ *  Colin O'Flynn coflynn@newae.com
+ *  Eric Gnoske egnoske@gmail.com
+ *  Blake Leverett bleverett@gmail.com
+ *  Mike Vidales mavida404@gmail.com
+ *  Kevin Brown kbrown3@uccs.edu
+ *  Nate Bohlmann nate@elfwerks.com
  *  David Kopf dak664@embarqmail.com
  *  Ivan Delamer delamer@ieee.com
  *
- *   All rights reserved.
+ *  All rights reserved.
  *
- *   Redistribution and use in source and binary forms, with or without
- *   modification, are permitted provided that the following conditions are met:
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions are met:
  *
- *   * Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in
- *     the documentation and/or other materials provided with the
- *     distribution.
- *   * Neither the name of the copyright holders nor the names of
- *     contributors may be used to endorse or promote products derived
- *     from this software without specific prior written permission.
+ *  * Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *  * Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ *  * Neither the name of the copyright holders nor the names of
+ *    contributors may be used to endorse or promote products derived
+ *    from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- *  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- *  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- *  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- *  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- *  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- *  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- *  POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 /**
  *    \addtogroup radiorf23x
@@ -57,48 +58,46 @@
 #include "radio/hal.h"
 #include "rf23x_registermap.h"
 
-
 /*============================ MACROS ========================================*/
-#define SUPPORTED_PART_NUMBER                   ( 2 )
-#define RF23X_REVA                              ( 1 )
-#define RF23X_REVB                              ( 2 )
-#define SUPPORTED_MANUFACTURER_ID               ( 31 )
+#define SUPPORTED_PART_NUMBER                   (2)
+#define RF23X_REVA                              (1)
+#define RF23X_REVB                              (2)
+#define SUPPORTED_MANUFACTURER_ID               (31)
 
 #if defined(__AVR_ATmega128RFA1__)
-#define RF23X_SUPPORTED_INTERRUPT_MASK          ( 0xFF )
+#define RF23X_SUPPORTED_INTERRUPT_MASK          (0xFF)
 #else
 /* RF230 does not support RX_START interrupts in extended mode, but it seems harmless to always enable it. */
 /* In non-extended mode this allows RX_START to sample the RF rssi at the end of the preamble */
-//#define RF23X_SUPPORTED_INTERRUPT_MASK        ( 0x08 )  //enable trx end only
-//#define RF23X_SUPPORTED_INTERRUPT_MASK          ( 0x0F ) //disable bat low, trx underrun
-#define RF23X_SUPPORTED_INTERRUPT_MASK          ( 0x0C )  //disable bat low, trx underrun, pll lock/unlock
+//#define RF23X_SUPPORTED_INTERRUPT_MASK          (0x08)  /*enable trx end only */
+//#define RF23X_SUPPORTED_INTERRUPT_MASK          (0x0F)  /* disable bat low, trx underrun */
+#define RF23X_SUPPORTED_INTERRUPT_MASK          (0x0C)  /* disable bat low, trx underrun, pll lock/unlock */
 #endif
 
-#define RF23X_MIN_CHANNEL                       ( 11 )
-#define RF23X_MAX_CHANNEL                       ( 26 )
-#define RF23X_MIN_ED_THRESHOLD                  ( 0 )
-#define RF23X_MAX_ED_THRESHOLD                  ( 15 )
-#define RF23X_MAX_TX_FRAME_LENGTH               ( 127 ) /**< 127 Byte PSDU. */
+#define RF23X_MIN_CHANNEL                       (11)
+#define RF23X_MAX_CHANNEL                       (26)
+#define RF23X_MIN_ED_THRESHOLD                  (0)
+#define RF23X_MAX_ED_THRESHOLD                  (15)
+#define RF23X_MAX_TX_FRAME_LENGTH               (127) /**< 127 Byte PSDU. */
 
-#define TX_PWR_3DBM                             ( 0 )
-#define TX_PWR_17_2DBM                          ( 15 )
+#define TX_PWR_3DBM                             (0)
+#define TX_PWR_17_2DBM                          (15)
 
 #define TX_PWR_MAX                             TX_PWR_3DBM
 #define TX_PWR_MIN                             TX_PWR_17_2DBM
-#define TX_PWR_UNDEFINED                       (TX_PWR_MIN+1)
+#define TX_PWR_UNDEFINED                       (TX_PWR_MIN + 1)
 
+#define BATTERY_MONITOR_HIGHEST_VOLTAGE         (15)
+#define BATTERY_MONITOR_VOLTAGE_UNDER_THRESHOLD (0)
+#define BATTERY_MONITOR_HIGH_VOLTAGE            (1)
+#define BATTERY_MONITOR_LOW_VOLTAGE             (0)
 
-#define BATTERY_MONITOR_HIGHEST_VOLTAGE         ( 15 )
-#define BATTERY_MONITOR_VOLTAGE_UNDER_THRESHOLD ( 0 )
-#define BATTERY_MONITOR_HIGH_VOLTAGE            ( 1 )
-#define BATTERY_MONITOR_LOW_VOLTAGE             ( 0 )
+#define FTN_CALIBRATION_DONE                    (0)
+#define PLL_DCU_CALIBRATION_DONE                (0)
+#define PLL_CF_CALIBRATION_DONE                 (0)
 
-#define FTN_CALIBRATION_DONE                    ( 0 )
-#define PLL_DCU_CALIBRATION_DONE                ( 0 )
-#define PLL_CF_CALIBRATION_DONE                 ( 0 )
-
-#define RC_OSC_REFERENCE_COUNT_MAX  (1.005*F_CPU*31250UL/8000000UL)
-#define RC_OSC_REFERENCE_COUNT_MIN  (0.995*F_CPU*31250UL/8000000UL)
+#define RC_OSC_REFERENCE_COUNT_MAX  (1.005 * F_CPU * 31250UL / 8000000UL)
+#define RC_OSC_REFERENCE_COUNT_MIN  (0.995 * F_CPU * 31250UL / 8000000UL)
 
 #ifndef RF_CHANNEL
 #define RF_CHANNEL              26
@@ -114,7 +113,7 @@
  *
  *  \see radio_status_t
  */
-#define RADIO_STATUS_START_VALUE                  ( 0x40 )
+#define RADIO_STATUS_START_VALUE                  (0x40)
 
 /** \brief  This enumeration defines the possible return values for the TAT API
  *          functions.
@@ -123,24 +122,23 @@
  *          return/status codes defined in the IEEE 802.15.4 standard.
  *
  */
-typedef enum{
-    RADIO_SUCCESS = RADIO_STATUS_START_VALUE,  /**< The requested service was performed successfully. */
-    RADIO_UNSUPPORTED_DEVICE,         /**< The connected device is not an Atmel AT86RF230. */
-    RADIO_INVALID_ARGUMENT,           /**< One or more of the supplied function arguments are invalid. */
-    RADIO_TIMED_OUT,                  /**< The requested service timed out. */
-    RADIO_WRONG_STATE,                /**< The end-user tried to do an invalid state transition. */
-    RADIO_BUSY_STATE,                 /**< The radio transceiver is busy receiving or transmitting. */
-    RADIO_STATE_TRANSITION_FAILED,    /**< The requested state transition could not be completed. */
-    RADIO_CCA_IDLE,                   /**< Channel is clear, available to transmit a new frame. */
-    RADIO_CCA_BUSY,                   /**< Channel busy. */
-    RADIO_TRX_BUSY,                   /**< Transceiver is busy receiving or transmitting data. */
-    RADIO_BAT_LOW,                    /**< Measured battery voltage is lower than voltage threshold. */
-    RADIO_BAT_OK,                     /**< Measured battery voltage is above the voltage threshold. */
-    RADIO_CRC_FAILED,                 /**< The CRC failed for the actual frame. */
-    RADIO_CHANNEL_ACCESS_FAILURE,     /**< The channel access failed during the auto mode. */
-    RADIO_NO_ACK,                     /**< No acknowledge frame was received. */
+typedef enum {
+  RADIO_SUCCESS = RADIO_STATUS_START_VALUE,  /**< The requested service was performed successfully. */
+  RADIO_UNSUPPORTED_DEVICE,         /**< The connected device is not an Atmel AT86RF230. */
+  RADIO_INVALID_ARGUMENT,           /**< One or more of the supplied function arguments are invalid. */
+  RADIO_TIMED_OUT,                  /**< The requested service timed out. */
+  RADIO_WRONG_STATE,                /**< The end-user tried to do an invalid state transition. */
+  RADIO_BUSY_STATE,                 /**< The radio transceiver is busy receiving or transmitting. */
+  RADIO_STATE_TRANSITION_FAILED,    /**< The requested state transition could not be completed. */
+  RADIO_CCA_IDLE,                   /**< Channel is clear, available to transmit a new frame. */
+  RADIO_CCA_BUSY,                   /**< Channel busy. */
+  RADIO_TRX_BUSY,                   /**< Transceiver is busy receiving or transmitting data. */
+  RADIO_BAT_LOW,                    /**< Measured battery voltage is lower than voltage threshold. */
+  RADIO_BAT_OK,                     /**< Measured battery voltage is above the voltage threshold. */
+  RADIO_CRC_FAILED,                 /**< The CRC failed for the actual frame. */
+  RADIO_CHANNEL_ACCESS_FAILURE,     /**< The channel access failed during the auto mode. */
+  RADIO_NO_ACK,                     /**< No acknowledge frame was received. */
 }radio_status_t;
-
 
 /**
  * \name Transaction status codes
@@ -154,49 +152,45 @@ typedef enum{
 #define TRAC_INVALID                7
 /** \} */
 
-
 /** \brief  This enumeration defines the possible modes available for the
  *          Clear Channel Assessment algorithm.
  *
  *          These constants are extracted from the datasheet.
  *
  */
-typedef enum{
-    CCA_ENERGY_DETECT         = 0,    /**< Use energy detection above threshold mode. */
-    CCA_CARRIER_SENSE         = 1,    /**< Use carrier sense mode. */
-    CCA_CARRIER_SENSE_WITH_ED = 2     /**< Use a combination of both energy detection and carrier sense. */
+typedef enum {
+  CCA_ENERGY_DETECT = 0,        /**< Use energy detection above threshold mode. */
+  CCA_CARRIER_SENSE = 1,        /**< Use carrier sense mode. */
+  CCA_CARRIER_SENSE_WITH_ED = 2 /**< Use a combination of both energy detection and carrier sense. */
 }radio_cca_mode_t;
-
 
 /** \brief  This enumeration defines the possible CLKM speeds.
  *
  *          These constants are extracted from the RF230 datasheet.
  *
  */
-typedef enum{
-    CLKM_DISABLED      = 0,
-    CLKM_1MHZ          = 1,
-    CLKM_2MHZ          = 2,
-    CLKM_4MHZ          = 3,
-    CLKM_8MHZ          = 4,
-    CLKM_16MHZ         = 5
+typedef enum {
+  CLKM_DISABLED = 0,
+  CLKM_1MHZ = 1,
+  CLKM_2MHZ = 2,
+  CLKM_4MHZ = 3,
+  CLKM_8MHZ = 4,
+  CLKM_16MHZ = 5
 }radio_clkm_speed_t;
 
 typedef void (*radio_rx_callback) (uint16_t data);
 
-
-/*	Hook Documentation 
-**	
-**	Sniffing Hooks:
-**		RF23X_HOOK_TX_PACKET(buffer,total_len)
-**		RF23X_HOOK_RX_PACKET(buf,len)
-**
-**	RF23X_HOOK_IS_SEND_ENABLED()
-**	RF23X_HOOK_RADIO_ON()
-**	RF23X_HOOK_RADIO_OFF()
-**	
-*/
-
+/**  Hook Documentation
+ *
+ *  Sniffing Hooks:
+ *    RF23X_HOOK_TX_PACKET(buffer,total_len)
+ *    RF23X_HOOK_RX_PACKET(buf,len)
+ *
+ *  RF23X_HOOK_IS_SEND_ENABLED()
+ *  RF23X_HOOK_RADIO_ON()
+ *  RF23X_HOOK_RADIO_OFF()
+ *
+ */
 
 /*============================ PROTOTYPES ====================================*/
 
@@ -208,18 +202,18 @@ void rf23x_start_sneeze(void);
 void rf23x_set_channel(uint8_t channel);
 void rf23x_listen_channel(uint8_t channel);
 uint8_t rf23x_get_channel(void);
-void rf23x_set_pan_addr(unsigned pan,unsigned addr,const uint8_t ieee_addr[8]);
+void rf23x_set_pan_addr(unsigned pan, unsigned addr, const uint8_t ieee_addr[8]);
 void rf23x_set_txpower(uint8_t power);
 uint8_t rf23x_get_txpower(void);
 
 void rf23x_set_promiscuous_mode(bool isPromiscuous);
 bool rf23x_is_ready_to_send();
 
-extern uint8_t rf23x_last_correlation,rf23x_last_rssi,rf23x_smallest_rssi;
+extern uint8_t rf23x_last_correlation, rf23x_last_rssi, rf23x_smallest_rssi;
 
 uint8_t rf23x_get_raw_rssi(void);
 
-#define rf23x_rssi	rf23x_get_raw_rssi
+#define rf23x_rssi rf23x_get_raw_rssi
 
 #endif
 /** @} */
