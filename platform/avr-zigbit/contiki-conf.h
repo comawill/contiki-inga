@@ -105,11 +105,10 @@ void clock_adjust_ticks(clock_time_t howmany);
 #define UIP_CONF_TCP             1
 #endif
 
-/* The new NETSTACK interface requires RF230BB */
-#if RF230BB
+/* The new NETSTACK interface requires RF23X */
 #define SICSLOWPAN_CONF_COMPRESSION       SICSLOWPAN_COMPRESSION_HC06
 #define SICSLOWPAN_CONF_CONVENTIONAL_MAC  1     //for barebones driver, sicslowpan calls radio->read function
-#undef PACKETBUF_CONF_HDR_SIZE                  //RF230BB takes the packetbuf default for header size
+#undef PACKETBUF_CONF_HDR_SIZE                  //RF23X takes the packetbuf default for header size
 #define UIP_CONF_LLH_LEN         0
 
 /* No radio cycling */
@@ -121,10 +120,10 @@ void clock_adjust_ticks(clock_time_t howmany);
 #define NETSTACK_CONF_MAC         nullmac_driver
 #define NETSTACK_CONF_RDC         sicslowmac_driver
 #define NETSTACK_CONF_FRAMER      framer_802154
-#define NETSTACK_CONF_RADIO       rf230_driver
+#define NETSTACK_CONF_RADIO       rf23x_driver
 #define CHANNEL_802_15_4          26
-#define RF230_CONF_AUTOACK        1
-#define RF230_CONF_FRAME_RETRIES    2
+#define RF23X_CONF_AUTOACK        1
+#define RF23X_CONF_FRAME_RETRIES  2
 #define SICSLOWPAN_CONF_FRAG      1
 //Most browsers reissue GETs after 3 seconds which stops frag reassembly, longer MAXAGE does no good
 #define SICSLOWPAN_CONF_MAXAGE    3
@@ -133,18 +132,6 @@ void clock_adjust_ticks(clock_time_t howmany);
 /* Default uip_aligned_buf and sicslowpan_aligned_buf sizes of 1280 overflows RAM */
 #define UIP_CONF_BUFFER_SIZE	240
 
-#else
-/* Original combined RF230/mac code will not compile with current contiki stack */
-//#define PACKETBUF_CONF_HDR_SIZE    0            //RF230 handles headers internally
-/* 0 for IPv6, or 1 for HC1, 2 for HC01 */
-#define SICSLOWPAN_CONF_COMPRESSION_IPV6 0 
-#define SICSLOWPAN_CONF_COMPRESSION_HC1  1 
-#define SICSLOWPAN_CONF_COMPRESSION_HC01 2       //NB '2' is now HC06 in the core mac!
-//FTH081105
-#define SICSLOWPAN_CONF_COMPRESSION       SICSLOWPAN_CONF_COMPRESSION_HC01 
-#define SICSLOWPAN_CONF_MAXAGE 5
-#define UIP_CONF_LLH_LEN         14
-#endif /*RF230BB */
 
 #define SICSLOWPAN_CONF_MAX_ADDR_CONTEXTS 2
 #define SICSLOWPAN_CONF_FRAG              1 

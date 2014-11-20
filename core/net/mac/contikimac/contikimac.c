@@ -401,7 +401,7 @@ powercycle(struct rtimer *t, void *ptr)
              NETSTACK_RADIO.pending_packet() function), we stop
              snooping. */
 #if !RDC_CONF_HARDWARE_CSMA
-       /* A cca cycle will disrupt rx on some radios, e.g. mc1322x, rf230 */
+       /* A cca cycle will disrupt rx on some radios, e.g. mc1322x, rf23x */
        /*TODO: Modify those drivers to just return the internal RSSI when already in rx mode */
         if(NETSTACK_RADIO.channel_clear()) {
           ++silence_periods;

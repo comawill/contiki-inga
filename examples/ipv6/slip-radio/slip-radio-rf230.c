@@ -28,14 +28,13 @@
  *
  * This file is part of the Contiki operating system.
  *
- * Sets up some commands for the RF230 radio.
+ * Sets up some commands for the RF23X radio.
  */
 
 #include "contiki.h"
 #include "cmd.h"
 
-#include "radio/rf230/radio.h"
-#include "radio/rf230bb/rf230bb.h"
+#include "dev/rf23x/rf23x.h"
 
 
 #define DEBUG 0
@@ -49,12 +48,12 @@
 #endif
 
 int
-cmd_handler_rf230(const uint8_t *data, int len)
+cmd_handler_rf23x(const uint8_t *data, int len)
 {
   if(data[0] == '!') {
     if(data[1] == 'C') {
       PRINTF("CMD: Setting channel: %d\n", data[2]);
-      rf230_set_channel(data[2]);
+      rf23x_set_channel(data[2]);
       return 1;
     }
   } else if(data[0] == '?') {
@@ -63,7 +62,7 @@ cmd_handler_rf230(const uint8_t *data, int len)
       PRINTF("CMD: Getting channel: %d\n", data[2]);
       buf[0] = '!';
       buf[1] = 'C';
-      buf[2] = rf230_get_channel();
+      buf[2] = rf23x_get_channel();
       cmd_send(buf, 3);
       return 1;
     }

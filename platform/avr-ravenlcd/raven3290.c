@@ -89,9 +89,9 @@
  *   -# <b>REPORT_WAKE      - (0xC3)</b>
  *
  *     \section sleep_lcd Sleep and Doze
- *   -# The Raven draws 27 milliamps when the 3290p and 1284p are both running and the RF230 in receive mode.
+ *   -# The Raven draws 27 milliamps when the 3290p and 1284p are both running and the RF23X in receive mode.
  *   -# Sleeping the 3290p and LCD display drops this to 21 ma with no loss in contiki functionality.
- *   -# The RF230 radio draws 15.5/16.5/7.8/1.5/0.02 ma in Rx/Tx/PLL_ON/TRX_OFF/SLEEP states.
+ *   -# The RF23X radio draws 15.5/16.5/7.8/1.5/0.02 ma in Rx/Tx/PLL_ON/TRX_OFF/SLEEP states.
  *    It is controlled by contiki on the 1284p according to the selected MAC power protocols to obtain the
  *    bulk of power savings; however the 3290p menu can tell it to sleep unconditionally or in a doze cycle.
  *   -# Unconditional SLEEP requires pushing the joystick button for wakeup. Once awake the 3290p sends

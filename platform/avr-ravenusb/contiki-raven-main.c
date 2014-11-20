@@ -94,19 +94,11 @@
 #include "settings.h"
 #endif
 
-#if RF230BB           //radio driver using contiki core mac
-#include "radio/rf230bb/rf230bb.h"
+#include "dev/rf23x/rf23x.h"
 #include "net/mac/frame802154.h"
 #define UIP_IP_BUF ((struct uip_ip_hdr *)&uip_buf[UIP_LLH_LEN])
 linkaddr_t macLongAddr;
 #define	tmp_addr	macLongAddr
-#else                 //legacy radio driver using Atmel/Cisco 802.15.4'ish MAC
-#include <stdbool.h>
-#include "mac.h"
-#include "sicslowmac.h"
-#include "sicslowpan.h"
-#include "ieee-15-4-manager.h"
-#endif /* RF230BB */
 
 /* Test rtimers, also useful for pings, time stamps, routes, stack monitor */
 #define TESTRTIMER 0
@@ -236,8 +228,8 @@ const uint16_t default_panaddr PROGMEM = IEEE802154_PANID;
 #else
 const uint16_t default_panaddr PROGMEM = 0;
 #endif
-#ifdef RF230_MAX_TX_POWER
-const uint8_t default_txpower PROGMEM = RF230_MAX_TX_POWER;
+#ifdef RF23X_MAX_TX_POWER
+const uint8_t default_txpower PROGMEM = RF23X_MAX_TX_POWER;
 #else
 const uint8_t default_txpower PROGMEM = 0;
 #endif
@@ -282,8 +274,8 @@ uint16_t eemem_panaddr EEMEM = IEEE802154_PANADDR;
 #else
 uint16_t eemem_panaddr EEMEM = 0;
 #endif
-#ifdef RF230_MAX_TX_POWER
-uint8_t eemem_txpower EEMEM = RF230_MAX_TX_POWER;
+#ifdef RF23X_MAX_TX_POWER
+uint8_t eemem_txpower EEMEM = RF23X_MAX_TX_POWER;
 #else
 uint8_t eemem_txpower EEMEM = 0;
 #endif
@@ -473,7 +465,6 @@ uint16_t p=(uint16_t)&__bss_end;
 #endif
   if (!stdout) Led3_on();
   
-#if RF230BB
 #if JACKDAW_CONF_USE_SETTINGS
   PRINTA("Settings manager will be used.\n");
 #else
@@ -488,7 +479,7 @@ uint16_t p=(uint16_t)&__bss_end;
 
   ctimer_init();
   /* Start radio and radio receive process */
-  /* Note this starts RF230 process, so must be done after process_init */
+  /* Note this starts RF23X process, so must be done after process_init */
   NETSTACK_RADIO.init();
 
   /* Set addresses BEFORE starting tcpip process */
@@ -504,14 +495,14 @@ uint16_t p=(uint16_t)&__bss_end;
   memcpy(&uip_lladdr.addr, &tmp_addr.u8, 8);
 #endif
 
-  rf230_set_pan_addr(
+  rf23x_set_pan_addr(
 	get_panid_from_eeprom(),
 	get_panaddr_from_eeprom(),
 	(uint8_t *)&tmp_addr.u8
   );
   
-  rf230_set_channel(get_channel_from_eeprom());
-  rf230_set_txpower(get_txpower_from_eeprom());
+  rf23x_set_channel(get_channel_from_eeprom());
+  rf23x_set_txpower(get_txpower_from_eeprom());
 
   linkaddr_set_node_addr(&tmp_addr); 
 
@@ -523,7 +514,7 @@ uint16_t p=(uint16_t)&__bss_end;
 
 #if ANNOUNCE
   PRINTA("MAC address %x:%x:%x:%x:%x:%x:%x:%x\n\r",tmp_addr.u8[0],tmp_addr.u8[1],tmp_addr.u8[2],tmp_addr.u8[3],tmp_addr.u8[4],tmp_addr.u8[5],tmp_addr.u8[6],tmp_addr.u8[7]);
-  PRINTA("%s %s, channel %u",NETSTACK_MAC.name, NETSTACK_RDC.name,rf230_get_channel());
+  PRINTA("%s %s, channel %u",NETSTACK_MAC.name, NETSTACK_RDC.name, rf23x_get_channel());
   if (NETSTACK_RDC.channel_check_interval) {
     unsigned short tmp;
     tmp=CLOCK_SECOND / (NETSTACK_RDC.channel_check_interval == 0 ? 1:\
@@ -549,11 +540,6 @@ uint16_t p=(uint16_t)&__bss_end;
 #endif
 #endif /* UIP_CONF_IPV6_RPL */
 
-#else  /* RF230BB */
-/* The order of starting these is important! */
-  process_start(&mac_process, NULL);
-  process_start(&tcpip_process, NULL);
-#endif /* RF230BB */
 
   /* Start ethernet network and storage process */
   process_start(&usb_eth_process, NULL);
@@ -605,22 +591,22 @@ main(void)
     watchdog_periodic();
 
 /* Print rssi of all received packets, useful for range testing */
-#ifdef RF230_MIN_RX_POWER
+#ifdef RF23X_MIN_RX_POWER
     uint8_t lastprint;
-    if (rf230_last_rssi != lastprint) {        //can be set in halbb.c interrupt routine
-        PRINTA("%u ",rf230_last_rssi);
-        lastprint=rf230_last_rssi;
+    if (rf23x_last_rssi != lastprint) {        //can be set in halbb.c interrupt routine
+        PRINTA("%u ",rf23x_last_rssi);
+        lastprint=rf23x_last_rssi;
     }
 #endif
 
 #if 0
-/* Clock.c can trigger a periodic PLL calibration in the RF230BB driver.
+/* Clock.c can trigger a periodic PLL calibration in the RF23X driver.
  * This can show when that happens.
  */
-    extern uint8_t rf230_calibrated;
-    if (rf230_calibrated) {
-      PRINTA("\nRF230 calibrated!\n");
-      rf230_calibrated=0;
+    extern uint8_t rf23x_calibrated;
+    if (rf23x_calibrated) {
+      PRINTA("\nRF23X calibrated!\n");
+      rf23x_calibrated=0;
     }
 #endif
 
@@ -714,9 +700,9 @@ if ((rtime%STACKMONITOR)==3) {
     }
 #endif /* TESTRTIMER */
 
-//Use with RF230BB DEBUGFLOW to show path through driver
-#if RF230BB&&0
-extern uint8_t debugflowsize,debugflow[];  //in rf230bb.c
+//Use with RF23X DEBUGFLOW to show path through driver
+#if 0
+extern uint8_t debugflowsize,debugflow[];  //in rf23x.c
   if (debugflowsize) {
     debugflow[debugflowsize]=0;
     PRINTA("%s",debugflow);

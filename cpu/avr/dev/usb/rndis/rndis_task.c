@@ -52,9 +52,7 @@
 #include "usb_specific_request.h"
 #include "rndis/rndis_task.h"
 #include "rndis/rndis_protocol.h"
-#if RF230BB
-#include "rf230bb.h"
-#endif
+#include "rf23x.h"
 #include "uip.h"
 #include "sicslow_ethernet.h"
 #include <stdio.h>

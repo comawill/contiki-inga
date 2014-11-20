@@ -106,11 +106,11 @@ void clock_adjust_ticks(clock_time_t howmany);
 typedef unsigned long off_t;
 //#define EEPROMFS_ADDR_CODEPROP 0x8000
 
-/* RADIO_CONF_CALIBRATE_INTERVAL is used in rf230bb and clock.c. If nonzero a 256 second interval is used */
+/* RADIO_CONF_CALIBRATE_INTERVAL is used in rf23x and clock.c. If nonzero a 256 second interval is used */
 /* Calibration is automatic when the radio wakes so is not necessary when the radio periodically sleeps */
 //#define RADIO_CONF_CALIBRATE_INTERVAL 256
 
-/* RADIOSTATS is used in rf230bb, clock.c and the webserver cgi to report radio usage */
+/* RADIOSTATS is used in rf23x clock.c and the webserver cgi to report radio usage */
 #define RADIOSTATS                1
 
 /* More extensive stats */
@@ -131,31 +131,28 @@ typedef unsigned short uip_stats_t;
 /* Define MAX_*X_POWER to reduce tx power and ignore weak rx packets for testing a miniature multihop network.
  * Leave undefined for full power and sensitivity.
  * tx=0 (3dbm, default) to 15 (-17.2dbm)
- * RF230_CONF_AUTOACK sets the extended mode using the energy-detect register with rx=0 (-91dBm) to 84 (-7dBm)
+ * RF23X_CONF_AUTOACK sets the extended mode using the energy-detect register with rx=0 (-91dBm) to 84 (-7dBm)
  *   else the rssi register is used having range 0 (91dBm) to 28 (-10dBm)
- *   For simplicity RF230_MIN_RX_POWER is based on the energy-detect value and divided by 3 when autoack is not set.
- * On the RF230 a reduced rx power threshold will not prevent autoack if enabled and requested.
+ *   For simplicity RF23X_MIN_RX_POWER is based on the energy-detect value and divided by 3 when autoack is not set.
+ * On the RF23X a reduced rx power threshold will not prevent autoack if enabled and requested.
  * These numbers applied to both Raven and Jackdaw give a maximum communication distance of about 15 cm
- * and a 10 meter range to a full-sensitivity RF230 sniffer.
-#define RF230_MAX_TX_POWER 15
-#define RF230_MIN_RX_POWER 30
+ * and a 10 meter range to a full-sensitivity RF23X sniffer.
+#define RF23X_MAX_TX_POWER 15
+#define RF23x_MIN_RX_POWER 30
  */
   /* The rf231 and atmega128rfa1 can use an rssi threshold for triggering rx_busy that saves 0.5ma in rx mode */
-/* 1 - 15 maps into -90 to -48 dBm; the register is written with RF230_MIN_RX_POWER/6 + 1. Undefine for -100dBm sensitivity */
-//#define RF230_MIN_RX_POWER        0
+/* 1 - 15 maps into -90 to -48 dBm; the register is written with RF23X_MIN_RX_POWER/6 + 1. Undefine for -100dBm sensitivity */
+//#define RF23X_MIN_RX_POWER        0
 
-/* Network setup. The new NETSTACK interface requires RF230BB (as does ip4) */
-#if RF230BB
-#undef PACKETBUF_CONF_HDR_SIZE                  //Use the packetbuf default for header size
+/* Network setup. The new NETSTACK interface requires RF23X (as does ip4) */
+/* Use the packetbuf default for header size */
+#undef PACKETBUF_CONF_HDR_SIZE
 /* TX routine passes the cca/ack result in the return parameter */
 #define RDC_CONF_HARDWARE_ACK      1
 /* TX routine does automatic cca and optional backoff */
 #define RDC_CONF_HARDWARE_CSMA     1
 /* Allow MCU sleeping between channel checks */
 #define RDC_CONF_MCU_SLEEP         0
-#else
-#define PACKETBUF_CONF_HDR_SIZE    0            //RF230 combined driver/mac handles headers internally
-#endif /*RF230BB */
 
 #if UIP_CONF_IPV6
 #define LINKADDR_CONF_SIZE        8
@@ -202,20 +199,20 @@ typedef unsigned short uip_stats_t;
 #define NETSTACK_CONF_MAC         nullmac_driver
 #define NETSTACK_CONF_RDC         sicslowmac_driver
 #define NETSTACK_CONF_FRAMER      framer_802154
-#define NETSTACK_CONF_RADIO       rf230_driver
+#define NETSTACK_CONF_RADIO       rf23x_driver
 #define CHANNEL_802_15_4          26
 #define RADIO_CONF_CALIBRATE_INTERVAL 256
 /* AUTOACK receive mode gives better rssi measurements, even if ACK is never requested */
-#define RF230_CONF_AUTOACK        1
+#define RF23X_CONF_AUTOACK        1
 /* Request 802.15.4 ACK on all packets sent (else autoretry). This is primarily for testing. */
 #define SICSLOWPAN_CONF_ACK_ALL   0
 /* Number of auto retry attempts+1, 1-16. Set zero to disable extended TX_ARET_ON mode with CCA) */
-#define RF230_CONF_FRAME_RETRIES    3
+#define RF23X_CONF_FRAME_RETRIES    3
 /* Number of CSMA attempts 0-7. 802.15.4 2003 standard max is 5. */
-#define RF230_CONF_CSMA_RETRIES    5
+#define RF23X_CONF_CSMA_RETRIES    5
 /* CCA theshold energy -91 to -61 dBm (default -77). Set this smaller than the expected minimum rssi to avoid packet collisions */
 /* The Jackdaw menu 'm' command is helpful for determining the smallest ever received rssi */
-#define RF230_CONF_CCA_THRES    -85
+#define RF23X_CONF_CCA_THRES    -85
 /* Allow 6lowpan fragments (needed for large TCP maximum segment size) */
 #define SICSLOWPAN_CONF_FRAG      1
 /* Most browsers reissue GETs after 3 seconds which stops fragment reassembly so a longer MAXAGE does no good */
@@ -260,15 +257,15 @@ typedef unsigned short uip_stats_t;
 #define CONTIKIMAC_CONF_COMPOWER               1
 #define RIMESTATS_CONF_ENABLED                 1
 #define NETSTACK_CONF_FRAMER      framer_802154
-#define NETSTACK_CONF_RADIO       rf230_driver
+#define NETSTACK_CONF_RADIO       rf23x_driver
 #define CHANNEL_802_15_4          26
 /* The radio needs to interrupt during an rtimer interrupt */
 #define RTIMER_CONF_NESTED_INTERRUPTS 1
-#define RF230_CONF_AUTOACK        1
+#define RF23X_CONF_AUTOACK        1
 /* A 0 here means non-extended mode; 1 means extended mode with no retry, >1 for retrys */
-#define RF230_CONF_FRAME_RETRIES    1
+#define RF23X_CONF_FRAME_RETRIES    1
 /* A 0 here means cca but no retry, >1= for backoff retrys */
-#define RF230_CONF_CSMA_RETRIES    1
+#define RF23X_CONF_CSMA_RETRIES    1
 #define SICSLOWPAN_CONF_FRAG      1
 #define SICSLOWPAN_CONF_MAXAGE    3
 /* 211 bytes per queue buffer. Contikimac burst mode needs 15 for a 1280 byte MTU */
@@ -288,18 +285,18 @@ typedef unsigned short uip_stats_t;
 #define UIP_CONF_DS6_AADDR_NBU    0
 
 #elif 1  /* cx-mac radio cycling */
-/* RF230 does clear-channel assessment in extended mode (frame retries>0) */
-#define RF230_CONF_FRAME_RETRIES    1
-#if RF230_CONF_FRAME_RETRIES
+/* RF23X does clear-channel assessment in extended mode (frame retries>0) */
+#define RF23X_CONF_FRAME_RETRIES    1
+#if RF23X_CONF_FRAME_RETRIES
 #define NETSTACK_CONF_MAC         nullmac_driver
 #else
 #define NETSTACK_CONF_MAC         csma_driver
 #endif
 #define NETSTACK_CONF_RDC         cxmac_driver
 #define NETSTACK_CONF_FRAMER      framer_802154
-#define NETSTACK_CONF_RADIO       rf230_driver
+#define NETSTACK_CONF_RADIO       rf23x_driver
 #define CHANNEL_802_15_4          26
-#define RF230_CONF_AUTOACK        1
+#define RF23X_CONF_AUTOACK        1
 #define SICSLOWPAN_CONF_FRAG      1
 #define SICSLOWPAN_CONF_MAXAGE    3
 #define CXMAC_CONF_ANNOUNCEMENTS  0

@@ -65,19 +65,12 @@ unsigned char debugflowsize,debugflow[DEBUGFLOWSIZE];
 #include "loader/symbols-def.h"
 #include "loader/symtab.h"
 
-#if RF230BB        //radio driver using contiki core mac
-#include "radio/rf230bb/rf230bb.h"
+//radio driver using contiki core mac
+#include "dev/rf23x/rf23x.h"
 #include "net/mac/frame802154.h"
 #include "net/mac/framer-802154.h"
 #include "net/ipv6/sicslowpan.h"
 
-#else                 //radio driver using Atmel/Cisco 802.15.4'ish MAC
-#include <stdbool.h>
-#include "mac.h"
-#include "sicslowmac.h"
-#include "sicslowpan.h"
-#include "ieee-15-4-manager.h"
-#endif /*RF230BB*/
 
 #include "contiki.h"
 #include "contiki-net.h"
@@ -246,8 +239,6 @@ uint8_t i;
   /* etimers must be started before ctimer_init */
   process_start(&etimer_process, NULL);
 
-#if RF230BB
-
   ctimer_init();
   /* Start radio and radio receive process */
   NETSTACK_RADIO.init();
@@ -268,7 +259,7 @@ uint8_t i;
 #if UIP_CONF_IPV6 
   memcpy(&uip_lladdr.addr, &addr.u8, sizeof(linkaddr_t));
   linkaddr_set_node_addr(&addr);  
-  rf230_set_pan_addr(params_get_panid(),params_get_panaddr(),(uint8_t *)&addr.u8);
+  rf23x_set_pan_addr(params_get_panid(),params_get_panaddr(),(uint8_t *)&addr.u8);
 #elif WITH_NODE_ID
   node_id=get_panaddr_from_eeprom();
   addr.u8[1]=node_id&0xff;
@@ -276,13 +267,13 @@ uint8_t i;
   PRINTA("Node ID from eeprom: %X\n",node_id);
   uint16_t inv_node_id=((node_id&0xff00)>>8)+((node_id&0xff)<<8); // change order of bytes for rf23x
   linkaddr_set_node_addr(&addr);
-  rf230_set_pan_addr(params_get_panid(),inv_node_id,NULL);
+  rf23x_set_pan_addr(params_get_panid(),inv_node_id,NULL);
 #else
   linkaddr_set_node_addr(&addr);
-  rf230_set_pan_addr(params_get_panid(),params_get_panaddr(),(uint8_t *)&addr.u8);
+  rf23x_set_pan_addr(params_get_panid(),params_get_panaddr(),(uint8_t *)&addr.u8);
 #endif
-  rf230_set_channel(params_get_channel());
-  rf230_set_txpower(params_get_txpower());
+  rf23x_set_channel(params_get_channel());
+  rf23x_set_txpower(params_get_txpower());
 
 #if UIP_CONF_IPV6
   PRINTA("EUI-64 MAC: %x-%x-%x-%x-%x-%x-%x-%x\n",addr.u8[0],addr.u8[1],addr.u8[2],addr.u8[3],addr.u8[4],addr.u8[5],addr.u8[6],addr.u8[7]);
@@ -302,9 +293,9 @@ uint8_t i;
   NETSTACK_NETWORK.init();
 
 #if ANNOUNCE_BOOT
-  PRINTA("%s %s, channel %u , check rate %u Hz tx power %u\n",NETSTACK_MAC.name, NETSTACK_RDC.name, rf230_get_channel(),
+  PRINTA("%s %s, channel %u , check rate %u Hz tx power %u\n",NETSTACK_MAC.name, NETSTACK_RDC.name, rf23x_get_channel(),
     CLOCK_SECOND / (NETSTACK_RDC.channel_check_interval() == 0 ? 1:NETSTACK_RDC.channel_check_interval()),
-    rf230_get_txpower());	   
+    rf23x_get_txpower());	   
 #if UIP_CONF_IPV6_RPL
   PRINTA("RPL Enabled\n");
 #endif
@@ -318,12 +309,6 @@ uint8_t i;
 
   process_start(&tcpip_process, NULL);
 
-#else /* !RF230BB */
-/* Original RF230 combined mac/radio driver */
-/* mac process must be started before tcpip process! */
-  process_start(&mac_process, NULL);
-  process_start(&tcpip_process, NULL);
-#endif /* RF230BB */
 
 #ifdef RAVEN_LCD_INTERFACE
   process_start(&raven_lcd_process, NULL);
@@ -443,21 +428,21 @@ main(void)
  * Set as next statement and step into the routine.
  */
     NETSTACK_RADIO.send(packetbuf_hdrptr(), 42);
-    process_poll(&rf230_process);
+    process_poll(&rf23x_process);
     packetbuf_clear();
-    len = rf230_read(packetbuf_dataptr(), PACKETBUF_SIZE);
+    len = rf23x_read(packetbuf_dataptr(), PACKETBUF_SIZE);
     packetbuf_set_datalen(42);
     NETSTACK_RDC.input();
 #endif
 
 #if 0
-/* Clock.c can trigger a periodic PLL calibration in the RF230BB driver.
+/* Clock.c can trigger a periodic PLL calibration in the RF23X driver.
  * This can show when that happens.
  */
-    extern uint8_t rf230_calibrated;
-    if (rf230_calibrated) {
-      PRINTD("\nRF230 calibrated!\n");
-      rf230_calibrated=0;
+    extern uint8_t rf23x_calibrated;
+    if (rf23x_calibrated) {
+      PRINTD("\nRF23X calibrated!\n");
+      rf23x_calibrated=0;
     }
 #endif
 
@@ -568,21 +553,21 @@ if ((clocktime%STACKMONITOR)==3) {
     }
 #endif /* PERIODICPRINTS */
 
-#if RF230BB&&0
-extern uint8_t rf230processflag;
-    if (rf230processflag) {
-      PRINTF("rf230p%d",rf230processflag);
-      rf230processflag=0;
+#if 0
+extern uint8_t rf23xprocessflag;
+    if (rf23xprocessflag) {
+      PRINTF("rf23xp%d",rf23xprocessflag);
+      rf23xprocessflag=0;
     }
 #endif
 
-#if RF230BB&&0
-extern uint8_t rf230_interrupt_flag;
-    if (rf230_interrupt_flag) {
- //   if (rf230_interrupt_flag!=11) {
-        PRINTF("**RI%u",rf230_interrupt_flag);
+#if 0
+extern uint8_t rf23x_interrupt_flag;
+    if (rf23x_interrupt_flag) {
+ //   if (rf23x_interrupt_flag!=11) {
+        PRINTF("**RI%u",rf23x_interrupt_flag);
  //   }
-      rf230_interrupt_flag=0;
+      rf23x_interrupt_flag=0;
     }
 #endif
   }

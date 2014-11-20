@@ -61,7 +61,7 @@ extern char TCPBUF[512];
 #endif
 
 /* RADIOSTATS must also be set in clock.c and the radio driver */
-#if RF230BB
+#if RF23X
 #define RADIOSTATS 1
 #endif
 
@@ -112,8 +112,8 @@ static const char *states[] = {
 #if RADIOSTATS
   extern unsigned long radioontime;
   static unsigned long savedradioontime;
-  extern uint8_t RF230_radio_on, rf230_last_rssi;
-  extern uint16_t RF230_sendpackets,RF230_receivepackets,RF230_sendfail,RF230_receivefail;
+  extern uint8_t RF23X_radio_on, rf23x_last_rssi;
+  extern uint16_t RF23X_sendpackets,RF23X_receivepackets,RF23X_sendfail,RF23X_receivefail;
 #endif
   
 
@@ -465,16 +465,8 @@ generate_radio_stats(void *arg)
   numprinted =httpd_snprintf((char *)uip_appdata             , uip_mss()             , httpd_cgi_sensor10,\
     h,m,s,p1,p2);
 
-#if RF230BB
   numprinted+=httpd_snprintf((char *)uip_appdata + numprinted, uip_mss() - numprinted, httpd_cgi_sensor11,\
-    RF230_sendpackets,RF230_receivepackets,RF230_sendfail,RF230_receivefail,-92+rf230_last_rssi);
-#else
-  p1=0;
-  radio_get_rssi_value(&p1);
-  p1 = -91*3(p1-1);
-  numprinted+=httpd_snprintf((char *)uip_appdata + numprinted, uip_mss() - numprinted, httpd_cgi_sensor11,\
-    RF230_sendpackets,RF230_receivepackets,RF230_sendfail,RF230_receivefail,p1);
-#endif
+    RF23X_sendpackets,RF23X_receivepackets,RF23X_sendfail,RF23X_receivefail,-92+rf23x_last_rssi);
  
   return numprinted;
 }

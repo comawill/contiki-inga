@@ -52,7 +52,7 @@
 */
 
 //TODO: Should be able to always use this SIMPLE mode, hence can remove the 'complex' mode permanently
-//TODO: RF230BB !SIMPLE works on XP, Ubuntu. SIMPLE works on Vista, W7. Find out why!
+//TODO: RF23X !SIMPLE works on XP, Ubuntu. SIMPLE works on Vista, W7. Find out why!
 
 #ifndef UIP_CONF_SIMPLE_JACKDAW_ADDR_TRANS
 #define UIP_CONF_SIMPLE_JACKDAW_ADDR_TRANS 0
@@ -229,11 +229,6 @@
 #include "net/rime/rime.h"
 #include "sicslowpan.h"
 #include "sicslow_ethernet.h"
-#if !RF230BB
-#include "zmac.h"
-#include "frame.h"
-#include "radio.h"
-#endif
 #include "rndis/rndis_protocol.h"
 #include "rndis/rndis_task.h"
 
@@ -267,11 +262,6 @@ extern uint64_t usb_ethernet_addr;
 
 extern uint64_t macLongAddr;
 
-#if !RF230BB
-extern void (*pinput)(const struct mac_driver *r);
-void (*sicslowinput)(const struct mac_driver *r);
-parsed_frame_t * parsed_frame;
-#endif
 usbstick_mode_t usbstick_mode;
 
 uint8_t mac_createSicslowpanLongAddr(uint8_t * ethernet, uip_lladdr_t * lowpan);
@@ -301,9 +291,6 @@ uint8_t raw_buf[127+ UIP_LLH_LEN +1];
 /**
  * \brief   Perform any setup needed
  */
-#if !RF230BB
- struct mac_driver * pmac;
-#endif
 void mac_ethernetSetup(void)
 {
   usbstick_mode.sicslowpan = 1;
@@ -313,13 +300,6 @@ void mac_ethernetSetup(void)
   usbstick_mode.raw = 0;
   usbstick_mode.sneeze=0;
 
-#if !RF230BB
-  sicslowinput = pinput;
-
-  pmac = sicslowmac_get_driver();
-  pmac->set_receive_function(mac_ethhijack);
-  sicslowmac_snifferhook = mac_ethhijack_nondata;
-#endif
 }
 
 
@@ -351,9 +331,6 @@ void mac_ethernetToLowpan(uint8_t * ethHeader)
   if (((struct uip_eth_hdr *) ethHeader)->type != UIP_HTONS(UIP_ETHTYPE_IPV6)) {
     PRINTF("eth2low: Dropping packet w/type=0x%04x\n",uip_ntohs(((struct uip_eth_hdr *) ethHeader)->type));
   //      printf("!ipv6");
-#if !RF230BB
-    usb_eth_stat.txbad++;
-#endif
     uip_len = 0;
     return;
   }
@@ -372,9 +349,6 @@ void mac_ethernetToLowpan(uint8_t * ethHeader)
             (((struct uip_eth_hdr *) ethHeader)->dest.addr[5] == 0xFF) ) {
     /* IPv6 does not use broadcast addresses, hence this should not happen */
     PRINTF("eth2low: Dropping broadcast packet\n\r");
-#if !RF230BB
-    usb_eth_stat.txbad++;
-#endif
     uip_len = 0;
     return;
   } else {
@@ -419,9 +393,6 @@ void mac_ethernetToLowpan(uint8_t * ethHeader)
     //Check this returns OK
     if (mac_createSicslowpanLongAddr( &(((struct uip_eth_hdr *) ethHeader)->dest.addr[0]), &destAddr) == 0) {
       PRINTF(" translation failed\n\r");
-#if !RF230BB
-      usb_eth_stat.txbad++;
-#endif
       uip_len = 0;
       return;
     }
@@ -460,9 +431,6 @@ void mac_ethernetToLowpan(uint8_t * ethHeader)
   tcpip_output();    //Allow non-ipv6 builds (Hello World) 
 #endif /* UIP_CONF_IPV6 */
 
-#if !RF230BB
-  usb_eth_stat.txok++;
-#endif
   uip_len = 0;
 
 }
@@ -474,22 +442,14 @@ void mac_ethernetToLowpan(uint8_t * ethHeader)
  */
 void mac_LowpanToEthernet(void)
 {
-#if !RF230BB
-  parsed_frame = sicslowmac_get_frame();
-#endif
 
   //Setup generic ethernet stuff
   ETHBUF(uip_buf)->type = uip_htons(UIP_ETHTYPE_IPV6);
 
   //Check for broadcast message
   
-#if RF230BB
   if(linkaddr_cmp(packetbuf_addr(PACKETBUF_ADDR_RECEIVER), &linkaddr_null)) {
 //  if(linkaddr_cmp((const linkaddr_t *)destAddr, &linkaddr_null)) {
-#else
-  if(  ( parsed_frame->fcf->destAddrMode == SHORTADDRMODE) &&
-       ( parsed_frame->dest_addr->addr16 == 0xffff) ) {
-#endif
     ETHBUF(uip_buf)->dest.addr[0] = 0x33;
     ETHBUF(uip_buf)->dest.addr[1] = 0x33;
 
@@ -543,9 +503,6 @@ void mac_LowpanToEthernet(void)
   uip_len += UIP_LLH_LEN;
 
   usb_eth_send(uip_buf, uip_len, 1);
-#if !RF230BB
-  usb_eth_stat.rxok++;
-#endif
   uip_len = 0;
 }
 
@@ -1044,82 +1001,10 @@ mac_log_802_15_4_rx(const uint8_t* buf, size_t len) {
     usb_eth_send(raw_buf, sendlen, 0);
   }
 }
-/* The rf230bb send driver may call this routine via  RF230BB_HOOK_IS_SEND_ENABLED */
+/* The rf23x send driver may call this routine via  RF23X_HOOK_IS_SEND_ENABLED */
 bool
 mac_is_send_enabled(void) {
   if ((usbstick_mode.sendToRf == 0) || (usbstick_mode.sneeze != 0)) return 0;
   return 1;
 //return usbstick_mode.sendToRf;
 }
-
-/** @} */
-
-
-
-/** @} */
-
-
-#if !RF230BB
-/*--------------------------------------------------------------------*/
-/** \brief Process a received 6lowpan packet. Hijack function.
- *  \param r The MAC layer
- *
- *  The 6lowpan packet is put in packetbuf by the MAC. This routine calls
- *  any other needed layers (either 6lowpan, or just raw ethernet dump)
- */
-void mac_ethhijack(const struct mac_driver *r)
-{
-	if (usbstick_mode.raw) {
-		mac_802154raw(r);
-	}
-		
-	if (usbstick_mode.sicslowpan) {
-
-#if UIP_CONF_USE_RUM
-	if (parsed_frame->payload[4]) { /* RUM 6lowpan frame type */
-#endif
-		sicslowinput(r);	
-#if UIP_CONF_USE_RUM
-	}
-#endif		
-		
-		
-	}
-
-}
-
-void mac_ethhijack_nondata(const struct mac_driver *r)
-{
-	if (usbstick_mode.raw)
-		mac_802154raw(r);
-}
-
-
-/*--------------------------------------------------------------------*/
-/*--------------------------------------------------------------------*/
-/** \brief Logs a sent 6lowpan frame
- *
- *  This routine passes a frame 
- *  directly to the ethernet layer without decompressing.
- */
-void mac_logTXtoEthernet(frame_create_params_t *p,frame_result_t *frame_result)
-{
-	mac_log_802_15_4_tx(frame_result->frame, frame_result->length);
-}
-
-
-/*--------------------------------------------------------------------*/
-/** \brief Process a received 6lowpan packet. 
- *  \param r The MAC layer
- *
- *  The 6lowpan packet is put in packetbuf by the MAC. This routine passes
- *  it directly to the ethernet layer without decompressing.
- */
-void mac_802154raw(const struct mac_driver *r) { 
-	mac_log_802_15_4_tx(radio_frame_data(), radio_frame_length());
-}
-
-#endif /* !RF230BB */
-
-
-

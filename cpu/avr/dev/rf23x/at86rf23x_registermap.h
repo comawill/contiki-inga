@@ -2,48 +2,49 @@
  * @file
  * @brief This file contains the register definitions for the AT86RF230.
  */
-/*   Copyright (c) 2008, Swedish Institute of Computer Science
-  All rights reserved. 
+/*
+ * Copyright (c) 2008, Swedish Institute of Computer Science
+ * All rights reserved.
+ *
+ *  Additional fixes for AVR contributed by:
+ *
+ *  Colin O'Flynn coflynn@newae.com
+ *  Eric Gnoske egnoske@gmail.com
+ *  Blake Leverett bleverett@gmail.com
+ *  Mike Vidales mavida404@gmail.com
+ *  Kevin Brown kbrown3@uccs.edu
+ *  Nate Bohlmann nate@elfwerks.com
+ *
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions are met:
+ *
+ *  * Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *  * Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ *  * Neither the name of the copyright holders nor the names of
+ *    contributors may be used to endorse or promote products derived
+ *    from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 
-  Additional fixes for AVR contributed by:
-
-	Colin O'Flynn coflynn@newae.com
-	Eric Gnoske egnoske@gmail.com
-	Blake Leverett bleverett@gmail.com
-	Mike Vidales mavida404@gmail.com
-	Kevin Brown kbrown3@uccs.edu
-	Nate Bohlmann nate@elfwerks.com
-
-   All rights reserved.
-
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions are met:
-
-   * Redistributions of source code must retain the above copyright
-     notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in
-     the documentation and/or other materials provided with the
-     distribution.
-   * Neither the name of the copyright holders nor the names of
-     contributors may be used to endorse or promote products derived
-     from this software without specific prior written permission.
-
-  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
-  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-  POSSIBILITY OF SUCH DAMAGE.
-*/
-
-#ifndef PHY230_REGISTERMAP_EXTERNAL_H
-#define PHY230_REGISTERMAP_EXTERNAL_H
+#ifndef PHY23X_REGISTERMAP_EXTERNAL_H
+#define PHY23X_REGISTERMAP_EXTERNAL_H
 
 #define HAVE_REGISTER_MAP (1)
 /** Offset for register TRX_STATUS */
@@ -68,7 +69,7 @@
 /** Constant PLL_ON for sub-register @ref SR_TRX_STATUS */
 #define PLL_ON                   (9)
 /** Constant SLEEP for sub-register @ref SR_TRX_STATUS */
-#define SLEEP                    (15)
+// #define SLEEP                    (15)
 /** Constant BUSY_RX_AACK for sub-register @ref SR_TRX_STATUS */
 #define BUSY_RX_AACK             (17)
 /** Constant BUSY_TX_ARET for sub-register @ref SR_TRX_STATUS */
@@ -83,6 +84,8 @@
 #define RX_AACK_ON_NOCLK         (29)
 /** Constant BUSY_RX_AACK_NOCLK for sub-register @ref SR_TRX_STATUS */
 #define BUSY_RX_AACK_NOCLK       (30)
+/** Constant STATE_TRANSITION for sub-register @ref SR_TRX_STATUS */
+#define STATE_TRANSITION         (31)
 /** Offset for register TRX_STATE */
 #define RG_TRX_STATE                     (0x02)
 /** Access parameters for sub-register TRAC_STATUS in register @ref RG_TRX_STATE */
@@ -264,7 +267,7 @@
 /** Access parameters for sub-register PART_NUM in register @ref RG_PART_NUM */
 #define SR_PART_NUM                  0x1c, 0xff, 0
 /** Constant RF230 for sub-register @ref SR_PART_NUM */
-#define RF230                    (2)
+#define RF230_CONST                    (2)
 /** Offset for register VERSION_NUM */
 #define RG_VERSION_NUM                   (0x1d)
 /** Access parameters for sub-register VERSION_NUM in register @ref RG_VERSION_NUM */
@@ -342,9 +345,11 @@
 #define RG_CSMA_BE                      0x2f
 /** Access parameters for sub-register MIN_BE in register @ref RG_CSMA_SEED_1 */
 #define SR_MIN_BE                    0x2e, 0xc0, 6
-#define SR_reserved_2e_2             0x2e, 0x30, 4
+/** Access parameters for AACK_SET_PD bit in register @ref RG_CSMA_SEED_1 */
+#define SR_AACK_SET_PD               0x2e, 0x20, 5
+//#define SR_reserved_2e_2             0x2e, 0x30, 4
 /** Access parameters for sub-register I_AM_COORD in register @ref RG_CSMA_SEED_1 */
 #define SR_I_AM_COORD                0x2e, 0x08, 3
 /** Access parameters for sub-register CSMA_SEED_1 in register @ref RG_CSMA_SEED_1 */
 #define SR_CSMA_SEED_1               0x2e, 0x07, 0
-#endif /* PHY230_REGISTERMAP_EXTERNAL_H */
+#endif /* PHY23X_REGISTERMAP_EXTERNAL_H */

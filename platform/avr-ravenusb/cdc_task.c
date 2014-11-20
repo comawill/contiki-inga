@@ -56,11 +56,7 @@
 #include "rndis/rndis_protocol.h"
 #include "rndis/rndis_task.h"
 #include "sicslow_ethernet.h"
-#if RF230BB
-#include "rf230bb.h"
-#else
-#include "radio.h"
-#endif
+#include "dev/rf23x/rf23x.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -120,7 +116,7 @@ static struct etimer et;
 const char txonesdigit[16]   PROGMEM = {'3','2','2','1','1','0','0','1','2','3','4','5','7','9','2','7'};
 const char txtenthsdigit[16] PROGMEM = {'0','6','1','6','1','5','2','2','2','2','2','2','2','2','2','2'};
 static void printtxpower(void) {
-    uint8_t power=rf230_get_txpower()&0xf;
+    uint8_t power=rf23x_get_txpower()&0xf;
     char sign=(power<6?'+':'-');
     char tens=(power>14?'1':'0');
     char ones=pgm_read_byte(&txonesdigit[power]);
@@ -227,7 +223,7 @@ void menu_print(void)
 #if USB_CONF_RS232
 		PRINTF_P(PSTR("*  d        Toggle RS232 output   *\n\r"));
 #endif
-#if RF230BB && RF230_CONF_SNEEZER
+#if RF23X_CONF_SNEEZER
 		PRINTF_P(PSTR("*  S        Enable sneezer mode   *\n\r"));
 #endif
 #if UIP_CONF_IPV6_RPL
@@ -298,16 +294,10 @@ void menu_process(char c)
 					channel_string[channel_string_i] = 0;
 					tempchannel = atoi(channel_string);
 
-#if RF230BB
 					if ((tempchannel < 11) || (tempchannel > 26))  {
 						PRINTF_P(PSTR("\n\rInvalid input\n\r"));
 					} else {
-						rf230_set_channel(tempchannel);
-#else
-					if(radio_set_operating_channel(tempchannel)!=RADIO_SUCCESS) {
-						PRINTF_P(PSTR("\n\rInvalid input\n\r"));
-					} else {
-#endif
+						rf23x_set_channel(tempchannel);
 #if JACKDAW_CONF_USE_SETTINGS
 						if(settings_set_uint8(SETTINGS_KEY_CHANNEL, tempchannel)==SETTINGS_STATUS_OK) {
                             PRINTF_P(PSTR("\n\rChannel changed to %d and stored in EEPROM.\n\r"),tempchannel);
@@ -369,17 +359,11 @@ void menu_process(char c)
 				if (channel_string_i)  {
 					channel_string[channel_string_i] = 0;
 					tempchannel = atoi(channel_string);
-#if RF230BB
 					if ((tempchannel < 0) || (tempchannel > 15))  {
 						PRINTF_P(PSTR("\n\rInvalid input\n\r"));
 					} else {
-                    	PRINTF_P(PSTR(" ")); //for some reason needs a print here to clear the string input...
-						rf230_set_txpower(tempchannel);
-#else
-					if(radio_set_tx_power_level(tempchannel)!=RADIO_SUCCESS) {
-						PRINTF_P(PSTR("\n\rInvalid input\n\r"));
-					} else {
-#endif
+						PRINTF_P(PSTR(" ")); //for some reason needs a print here to clear the string input...
+						rf23x_set_txpower(tempchannel);
 #if JACKDAW_CONF_USE_SETTINGS
 						if(settings_set_uint8(SETTINGS_KEY_TXPOWER, tempchannel)==SETTINGS_STATUS_OK) {
 							PRINTF_P(PSTR("\n\rTransmit power changed to %d, and stored in EEPROM.\n\r"),tempchannel);
@@ -437,7 +421,7 @@ void menu_process(char c)
 
 		uint8_t i;
 
-        /* Any attempt to read an RF230 register in sneeze mode (e.g. rssi) will hang the MCU */
+        /* Any attempt to read an RF23X register in sneeze mode (e.g. rssi) will hang the MCU */
         /* So convert any command into a sneeze off */
         if (usbstick_mode.sneeze) c='S';
 
@@ -480,30 +464,26 @@ void menu_process(char c)
 				PRINTF_P(PSTR("Jackdaw now in sniffer mode\n\r"));
 				usbstick_mode.sendToRf = 0;
 				usbstick_mode.translate = 0;
-#if RF230BB
-				rf230_listen_channel(rf230_get_channel());
-#else
-				radio_set_trx_state(RX_ON);
-#endif
+				rf23x_listen_channel(rf23x_get_channel());
 				break;
 
-#if RF230BB && RF230_CONF_SNEEZER
+#if RF23X_CONF_SNEEZER
  			case 'S':
  				if (usbstick_mode.sneeze) {
-					rf230_warm_reset();
+					rf23x_warm_reset();
 					PRINTF_P(PSTR("Jackdaw now behaving itself.\n\r"));
 					usbstick_mode.sneeze = 0;
 				} else {
-					if (rf230_get_txpower()<3)
+					if (rf23x_get_txpower()<3)
 						PRINTF_P(PSTR("*****WARNING Radio may overheat in this mode*******\n\r"));
-					rf230_start_sneeze();
+					rf23x_start_sneeze();
 					PRINTF_P(PSTR("********Jackdaw is continuously broadcasting*******\n\r"));
 #if CONVERTTXPOWER
-					PRINTF_P(PSTR("*********on channel %2d with power "),rf230_get_channel());
+					PRINTF_P(PSTR("*********on channel %2d with power "), rf23x_get_channel());
 					printtxpower();
 					PRINTF_P(PSTR("*********\n\r"));
 #else
-					PRINTF_P(PSTR("************on channel %2d with power %2d************\n\r"),rf230_get_channel(),rf230_get_txpower());
+					PRINTF_P(PSTR("************on channel %2d with power %2d************\n\r"), rf23x_get_channel(), rf23x_get_txpower());
 #endif
 					PRINTF_P(PSTR("Press any key to stop.\n\r"));
 					watchdog_periodic();
@@ -516,11 +496,7 @@ void menu_process(char c)
 				PRINTF_P(PSTR("Jackdaw now in network mode\n\r"));
 				usbstick_mode.sendToRf = 1;
 				usbstick_mode.translate = 1;
-#if RF230BB
-				rf230_set_channel(rf230_get_channel());
-#else
-			    radio_set_trx_state(RX_AACK_ON);  //TODO: Use startup state which may be RX_ON
-#endif
+				rf23x_set_channel(rf23x_get_channel());
 				break;
 
 			case '6':
@@ -557,21 +533,13 @@ void menu_process(char c)
 
 
 			case 'c':
-#if RF230BB
-				PRINTF_P(PSTR("\nSelect 802.15.4 Channel in range 11-26 [%d]: "), rf230_get_channel());
-#else
-				PRINTF_P(PSTR("\nSelect 802.15.4 Channel in range 11-26 [%d]: "), radio_get_operating_channel());
-#endif
+				PRINTF_P(PSTR("\nSelect 802.15.4 Channel in range 11-26 [%d]: "), rf23x_get_channel());
 				menustate = channel;
 				channel_string_i = 0;
 				break;
 
 			case 'p':
-#if RF230BB
-				PRINTF_P(PSTR("\nSelect transmit power (0=+3dBm 15=-17.2dBm) [%d]: "), rf230_get_txpower());
-#else
-//				PRINTF_P(PSTR("\nSelect transmit power (0=+3dBm 15=-17.2dBm) [%d]: "), ?_power());;
-#endif
+				PRINTF_P(PSTR("\nSelect transmit power (0=+3dBm 15=-17.2dBm) [%d]: "), rf23x_get_txpower());
 				menustate = txpower;
 				channel_string_i = 0;
 				break;
@@ -671,35 +639,20 @@ extern uip_ds6_netif_t uip_ds6_if;
 					((uint8_t *)&macLongAddr)[6],
 					((uint8_t *)&macLongAddr)[7]
 				);
-#if RF230BB
 #if CONVERTTXPOWER
-				PRINTF_P(PSTR("  * Operates on channel %d with TX power "),rf230_get_channel());
+				PRINTF_P(PSTR("  * Operates on channel %d with TX power "),rf23x_get_channel());
 				printtxpower();
 				PRINTF_P(PSTR("\n\r"));
 #else  //just show the raw value
-				PRINTF_P(PSTR("  * Operates on channel %d\n\r"), rf230_get_channel());
-				PRINTF_P(PSTR("  * TX Power(0=+3dBm, 15=-17.2dBm): %d\n\r"), rf230_get_txpower());
+				PRINTF_P(PSTR("  * Operates on channel %d\n\r"), rf23x_get_channel());
+				PRINTF_P(PSTR("  * TX Power(0=+3dBm, 15=-17.2dBm): %d\n\r"), rf23x_get_txpower());
 #endif
-				if (rf230_smallest_rssi) {
-					PRINTF_P(PSTR("  * Current/Last/Smallest RSSI: %d/%d/%ddBm\n\r"), -91+(rf230_rssi()-1), -91+(rf230_last_rssi-1),-91+(rf230_smallest_rssi-1));
-					rf230_smallest_rssi=0;
+				if (rf23x_smallest_rssi) {
+					PRINTF_P(PSTR("  * Current/Last/Smallest RSSI: %d/%d/%ddBm\n\r"), -91+(rf23x_rssi()-1), -91+(rf23x_last_rssi-1),-91+(rf23x_smallest_rssi-1));
+					rf23x_smallest_rssi=0;
 				} else {
-					PRINTF_P(PSTR("  * Current/Last/Smallest RSSI: %d/%d/--dBm\n\r"), -91+(rf230_rssi()-1), -91+(rf230_last_rssi-1));
+					PRINTF_P(PSTR("  * Current/Last/Smallest RSSI: %d/%d/--dBm\n\r"), -91+(rf23x_rssi()-1), -91+(rf23x_last_rssi-1));
 				}
-
-#else /* RF230BB */
-				PRINTF_P(PSTR("  * Operates on channel %d\n\r"), radio_get_operating_channel());
-				PRINTF_P(PSTR("  * TX Power Level: 0x%02X\n\r"), radio_get_tx_power_level());
-				{
-					PRINTF_P(PSTR("  * Current RSSI: "));
-					int8_t rssi = 0;
-					if(radio_get_rssi_value(&rssi)==RADIO_SUCCESS)
-						PRINTF_P(PSTR("%ddB\n\r"), -91+3*(rssi-1));
-					else
-						PRINTF_P(PSTR("Unknown\n\r"));
-				}
-
-#endif /* RF230BB */
 
 				PRINTF_P(PSTR("  * Configuration: %d, USB<->ETH is "), usb_configuration_nb);
 				if (usb_eth_is_active == 0) PRINTF_P(PSTR("not "));
@@ -728,11 +681,7 @@ uint16_t p=(uint16_t)&__bss_end;
 				{
 					uint8_t i;
 					uint16_t j;
-#if RF230BB
-					uint8_t previous_channel = rf230_get_channel();
-#else // RF230BB
-					uint8_t previous_channel = radio_get_operating_channel();
-#endif
+					uint8_t previous_channel = rf23x_get_channel();
 					int8_t RSSI, maxRSSI[17];
 					uint16_t accRSSI[17];
 
@@ -741,18 +690,9 @@ uint16_t p=(uint16_t)&__bss_end;
 
 					for(j=0;j<(1<<12);j++) {
 						for(i=11;i<=26;i++) {
-#if RF230BB
-							rf230_listen_channel(i);
-#else // RF230BB
-							radio_set_operating_channel(i);
-#endif
+							rf23x_listen_channel(i);
 							_delay_us(3*10);
-#if RF230BB
-							RSSI = rf230_rssi();  //multiplies rssi register by 3 for consistency with energy-detect register
-#else // RF230BB
-							radio_get_rssi_value(&RSSI);
-							RSSI*=3;
-#endif
+							RSSI = rf23x_rssi();  //multiplies rssi register by 3 for consistency with energy-detect register
 							maxRSSI[i-11]=Max(maxRSSI[i-11],RSSI);
 							accRSSI[i-11]+=RSSI;
 						}
@@ -767,11 +707,7 @@ uint16_t p=(uint16_t)&__bss_end;
 							Led3_off();
 						watchdog_periodic();
 					}
-#if RF230BB
-					rf230_set_channel(previous_channel);
-#else // RF230BB
-					radio_set_operating_channel(previous_channel);
-#endif
+					rf23x_set_channel(previous_channel);
 					PRINTF_P(PSTR("\n"));
 					for(i=11;i<=26;i++) {
 						uint8_t activity=Min(maxRSSI[i-11],accRSSI[i-11]/(1<<7));
