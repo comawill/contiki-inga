@@ -81,7 +81,7 @@ uint8_t debugflowsize, debugflow[DEBUGFLOWSIZE];
 
 #include "ip/uip.h"
 
-#include "radio/rf230bb/rf230bb.h"
+#include "dev/rf23x/rf23x.h"
 #include "net/mac/frame802154.h"
 #include "net/mac/framer-802154.h"
 #include "net/ipv6/sicslowpan.h"
@@ -228,7 +228,7 @@ const char txtenthsdigit[16] PROGMEM = {'0','8','3','8','3','7','0','0','0','0',
 static void
 printtxpower(void)
 {
-  uint8_t power = rf230_get_txpower() & 0xf;
+  uint8_t power = rf23x_get_txpower() & 0xf;
   char sign = (power < 0x7 ? '+' : '-');
   char tens = (power > 0xD ? '1' : '0');
   char ones = pgm_read_byte(&txonesdigit[power]);
@@ -380,13 +380,13 @@ platform_radio_init(void)
   NETSTACK_RADIO.init();
 
   if (eui64_is_null(inga_cfg.eui64_addr)) {
-    rf230_set_pan_addr(inga_cfg.pan_id, inga_cfg.pan_addr, NULL);
+    rf23x_set_pan_addr(inga_cfg.pan_id, inga_cfg.pan_addr, NULL);
   } else {
-    rf230_set_pan_addr(inga_cfg.pan_id, inga_cfg.pan_addr, inga_cfg.eui64_addr);
+    rf23x_set_pan_addr(inga_cfg.pan_id, inga_cfg.pan_addr, inga_cfg.eui64_addr);
   }
 
-  rf230_set_channel(inga_cfg.radio_channel);
-  rf230_set_txpower(inga_cfg.radio_tx_power);
+  rf23x_set_channel(inga_cfg.radio_channel);
+  rf23x_set_txpower(inga_cfg.radio_tx_power);
 
   /* Initialize stack protocols */
   queuebuf_init();
@@ -410,8 +410,8 @@ platform_radio_init(void)
   PRINTA("  Check rate %lu Hz\n  Channel: %u\n  Power: %u",
       CLOCK_SECOND / (NETSTACK_RDC.channel_check_interval() == 0 ? 1 :
       NETSTACK_RDC.channel_check_interval()), // radio??
-      rf230_get_channel(),
-      rf230_get_txpower());
+      rf23x_get_channel(),
+      rf23x_get_txpower());
 #if INGA_CONVERTTXPOWER
       printf(" (");
       printtxpower();

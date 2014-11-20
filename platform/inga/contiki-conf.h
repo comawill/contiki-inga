@@ -111,12 +111,8 @@
 /* Network setup                                                              */
 /* ************************************************************************** */
 
-/* Network setup. The new NETSTACK interface requires RF230BB (as does ip4) */
-#if RF230BB
+/* Network setup. The new NETSTACK interface requires RF23X (as does ip4) */
 #undef PACKETBUF_CONF_HDR_SIZE                  //Use the packetbuf default for header size
-#else /* RF230BB */
-#define PACKETBUF_CONF_HDR_SIZE   0            //RF230 combined driver/mac handles headers internally
-#endif /* RF230BB */
 
 /* 211 bytes per queue buffer */
 #define QUEUEBUF_CONF_NUM         8
@@ -134,7 +130,7 @@
 #endif /* NETSTACK_CONF_RDC */
 
 #ifndef NETSTACK_CONF_RADIO
-#define NETSTACK_CONF_RADIO   rf230_driver
+#define NETSTACK_CONF_RADIO   rf23x_driver
 #endif /* NETSTACK_CONF_RADIO */
 
 #ifndef NETSTACK_CONF_FRAMER
@@ -181,20 +177,20 @@
 #define RADIO_CONF_CALIBRATE_INTERVAL 256
 /* AUTOACK receive mode gives better rssi measurements,
  * even if ACK is never requested */
-#define RF230_CONF_AUTOACK        1
+#define RF23X_CONF_AUTOACK        1
 /* Make nullrdc wait for the proper ACK before proceeding */
 #define NULLRDC_CONF_802154_AUTOACK 1
-/* Let the RF230 radio driver generate fake acknowledgements to make nullrdc happy */
-#define RF320_CONF_INSERTACK      1
+/* Let the RF23X radio driver generate fake acknowledgements to make nullrdc happy */
+#define RF32X_CONF_INSERTACK      1
 /* Number of CSMA attempts 0-7. 802.15.4 2003 standard max is 5. */
-#define RF230_CONF_FRAME_RETRIES  5
+#define RF23X_CONF_FRAME_RETRIES  5
 /* CCA theshold energy -91 to -61 dBm (default -77).
  * Set this smaller than the expected minimum rssi to avoid packet collisions */
 /* The Jackdaw menu 'm' command is helpful for determining the smallest ever received rssi */
-#define RF230_CONF_CCA_THRES      -85
+#define RF23X_CONF_CCA_THRES      -85
 /* Default is one RAM buffer for received packets. 
  * More than one may benefit multiple TCP connections or ports */
-#define RF230_CONF_RX_BUFFERS     3
+#define RF23X_CONF_RX_BUFFERS     3
 
 /* -- UIP settings */
 #define UIP_CONF_UDP_CHECKSUMS    1
@@ -243,18 +239,18 @@
  * for testing a miniature multihop network.
  * Leave undefined for full power and sensitivity.
  * tx=0 (3dbm, default) to 15 (-17.2dbm)
- * RF230_CONF_AUTOACK sets the extended mode using the energy-detect register 
+ * RF23X_CONF_AUTOACK sets the extended mode using the energy-detect register 
  * with rx=0 (-91dBm) to 84 (-7dBm)
  * else the rssi register is used having range 0 (91dBm) to 28 (-10dBm)
- * For simplicity RF230_MIN_RX_POWER is based on the energy-detect value 
+ * For simplicity RF23X_MIN_RX_POWER is based on the energy-detect value 
  * and divided by 3 when autoack is not set.
- * On the RF230 a reduced rx power threshold will not prevent autoack 
+ * On the RF23X a reduced rx power threshold will not prevent autoack 
  * if enabled and requested.
  * These numbers applied to both Raven and Jackdaw give a maximum 
  * communication distance of about 15 cm
  * and a 10 meter range to a full-sensitivity RF230 sniffer.
-#define RF230_MAX_TX_POWER 15
-#define RF230_MIN_RX_POWER 30
+#define RF23X_MAX_TX_POWER 15
+#define RF23X_MIN_RX_POWER 30
  */
 
 #define UIP_CONF_ROUTER                 1

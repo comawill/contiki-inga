@@ -32,9 +32,9 @@
  */
 
 #include "lib/sensors.h"
-#include "radio/rf230bb/hal.h"
+#include "radio/hal.h"
 #include "dev/radio.h"
-#include "radio/rf230bb/rf230bb.h"
+#include "dev/rf23x/rf23x.h"
 #include "dev/radio-sensor.h"
 
 const struct sensors_sensor radio_sensor;
@@ -46,10 +46,10 @@ value(int type)
 {
   switch(type) {
   case RADIO_SENSOR_LAST_PACKET:
-    return rf230_last_correlation;
+    return rf23x_last_correlation;
   case RADIO_SENSOR_LAST_VALUE:
   default:
-    return rf230_last_rssi;
+    return rf23x_last_rssi;
   }
 }
 /*---------------------------------------------------------------------------*/

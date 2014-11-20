@@ -113,18 +113,18 @@
 
 #elif PLATFORM_TYPE == INGA_RF23X_A
 /* 1284 inga */
-#   define SSPORT     B
-#   define SSPIN      (0x04)
-#   define SPIPORT    B
-#   define MOSIPIN    (0x05)
-#   define MISOPIN    (0x06)
-#   define SCKPIN     (0x07)
-#   define RSTPORT    B
-#   define RSTPIN     (0x01)
-#   define IRQPORT    D
-#   define IRQPIN     (0x06)
-#   define SLPTRPORT  B
-#   define SLPTRPIN   (0x03)
+#define SSPORT     B
+#define SSPIN      (0x04)
+#define SPIPORT    B
+#define MOSIPIN    (0x05)
+#define MISOPIN    (0x06)
+#define SCKPIN     (0x07)
+#define RSTPORT    B
+#define RSTPIN     (0x01)
+#define IRQPORT    D
+#define IRQPIN     (0x06)
+#define SLPTRPORT  B
+#define SLPTRPIN   (0x03)
 
 #elif PLATFORM_TYPE == RAVEN_D
 /* 1284 raven */
