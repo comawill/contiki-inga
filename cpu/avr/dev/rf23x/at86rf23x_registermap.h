@@ -149,6 +149,8 @@
 #define SR_TX_PWR                    0x05, 0x0f, 0
 /** Offset for register PHY_RSSI */
 #define RG_PHY_RSSI                      (0x06)
+/** Access paremeters for sub_register RND_VALUE in register @ref RG_PHY_RSSI */
+#define SR_RND_VALUE                 0x06, 0x60, 5
 #define SR_reserved_06_1             0x06, 0xe0, 5
 /** Access parameters for sub-register RSSI in register @ref RG_PHY_RSSI */
 #define SR_RSSI                      0x06, 0x1f, 0
