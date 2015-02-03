@@ -30,7 +30,7 @@
  */
 
 /* Work around GCC 4.8.1/4.7.2 optimizer bug https://gcc.gnu.org/bugzilla/show_bug.cgi?id=58545 */
-#if ((__GNUC__ == 4) && (__GNUC_MINOR__ == 8) && (__GNUC_PATCHLEVEL__ == 1)) || ((__GNUC__ == 4) && (__GNUC_MINOR__ == 7) && (__GNUC_PATCHLEVEL__ == 2))
+#if ((__GNUC__ == 4) && (__GNUC_MINOR__ == 8) && (__GNUC_PATCHLEVEL__ <= 3)) || ((__GNUC__ == 4) && (__GNUC_MINOR__ == 7) && (__GNUC_PATCHLEVEL__ == 2))
 #define FIX_OPTIMZERBUG __attribute__((optimize(2)))
 #else
 #define FIX_OPTIMZERBUG
