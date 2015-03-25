@@ -27,28 +27,27 @@
  * SUCH DAMAGE.
  *
  */
-
 package org.contikios.cooja.avrmote;
 
-import org.contikios.cooja.interfaces.SensorInterface;
 import org.contikios.cooja.AbstractionLevelDescription;
 import org.contikios.cooja.ClassDescription;
 import org.contikios.cooja.Mote;
 import org.contikios.cooja.MoteInterface;
 import org.contikios.cooja.Simulation;
+import org.contikios.cooja.avrmote.interfaces.AT86RF23xRadio;
 import org.contikios.cooja.avrmote.interfaces.AvrDebugger;
 import org.contikios.cooja.avrmote.interfaces.AvroraADC;
 import org.contikios.cooja.avrmote.interfaces.AvroraClock;
 import org.contikios.cooja.avrmote.interfaces.AvroraLED;
 import org.contikios.cooja.avrmote.interfaces.AvroraMoteID;
 import org.contikios.cooja.avrmote.interfaces.AvroraUsart0;
-import org.contikios.cooja.avrmote.interfaces.AT86RF23xRadio;
+import org.contikios.cooja.interfaces.FlashMemoryInterface;
 import org.contikios.cooja.interfaces.IPAddress;
 import org.contikios.cooja.interfaces.Mote2MoteRelations;
 import org.contikios.cooja.interfaces.MoteAttributes;
 import org.contikios.cooja.interfaces.Position;
 import org.contikios.cooja.interfaces.RimeAddress;
-
+import org.contikios.cooja.interfaces.SensorInterface;
 
 /**
  * AVR-based Raven mote types emulated in Avrora.
@@ -64,6 +63,7 @@ public class IngaMoteType extends AvroraMoteType {
   public final String getMoteName() {
     return ("Inga");
   }
+
   // The returned string is used for firmware file extension
   @Override
   public final String getMoteContikiTarget() {
@@ -84,20 +84,21 @@ public class IngaMoteType extends AvroraMoteType {
   @SuppressWarnings("unchecked")
   @Override
   public Class<? extends MoteInterface>[] getAllMoteInterfaceClasses() {
-    return new Class[] {
-        Position.class,
-        AvroraMoteID.class,
-        AvroraLED.class,
-        AT86RF23xRadio.class,
-        AvroraClock.class,
-        AvroraUsart0.class,
-        AvrDebugger.class,
-        AvroraADC.class,
-        Mote2MoteRelations.class,
-        MoteAttributes.class,
-        RimeAddress.class,
-        IPAddress.class,
-        SensorInterface.class
+    return new Class[]{
+      Position.class,
+      AvroraMoteID.class,
+      AvroraLED.class,
+      AT86RF23xRadio.class,
+      AvroraClock.class,
+      AvroraUsart0.class,
+      AvrDebugger.class,
+      AvroraADC.class,
+      Mote2MoteRelations.class,
+      MoteAttributes.class,
+      RimeAddress.class,
+      IPAddress.class,
+      SensorInterface.class,
+      FlashMemoryInterface.class
     };
   }
 

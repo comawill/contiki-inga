@@ -30,26 +30,6 @@
 
 package org.contikios.cooja.avrmote;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-
-import org.apache.log4j.Logger;
-import org.jdom.Element;
-
-import org.contikios.cooja.MoteInterface;
-import org.contikios.cooja.MoteInterfaceHandler;
-import org.contikios.cooja.MoteType;
-import org.contikios.cooja.Simulation;
-import org.contikios.cooja.Watchpoint;
-import org.contikios.cooja.WatchpointMote;
-import org.contikios.cooja.dialogs.CompileContiki;
-import org.contikios.cooja.dialogs.MessageList;
-import org.contikios.cooja.dialogs.MessageList.MessageContainer;
-import org.contikios.cooja.motes.AbstractEmulatedMote;
-import org.contikios.cooja.mote.memory.MemoryLayout;
-import org.contikios.cooja.plugins.Debugger.SourceLocation;
-
 import avrora.arch.avr.AVRProperties;
 import avrora.core.LoadableProgram;
 import avrora.core.SourceMapping;
@@ -60,17 +40,36 @@ import avrora.sim.mcu.EEPROM;
 import avrora.sim.platform.Platform;
 import avrora.sim.platform.PlatformFactory;
 import avrora.sim.types.SingleSimulation;
+import java.io.File;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.log4j.Logger;
+import org.contikios.cooja.FlashMemoryMote;
+import org.contikios.cooja.MoteInterface;
+import org.contikios.cooja.MoteInterfaceHandler;
+import org.contikios.cooja.MoteType;
 import org.contikios.cooja.SensorMote;
+import org.contikios.cooja.Simulation;
+import org.contikios.cooja.Watchpoint;
+import org.contikios.cooja.WatchpointMote;
+import org.contikios.cooja.dialogs.CompileContiki;
+import org.contikios.cooja.dialogs.MessageList;
+import org.contikios.cooja.dialogs.MessageList.MessageContainer;
+import org.contikios.cooja.interfaces.flash.FlashMemory;
 import org.contikios.cooja.interfaces.sensor.Sensor;
 import org.contikios.cooja.mote.memory.MemoryInterface;
+import org.contikios.cooja.mote.memory.MemoryLayout;
+import org.contikios.cooja.motes.AbstractEmulatedMote;
+import org.contikios.cooja.plugins.Debugger.SourceLocation;
+import org.jdom.Element;
 
 /**
  * @author Joakim Eriksson, Fredrik Osterlind, David Kopf
  */
-public abstract class AvroraMote extends AbstractEmulatedMote implements WatchpointMote, SensorMote {
+public abstract class AvroraMote extends AbstractEmulatedMote implements WatchpointMote, SensorMote, FlashMemoryMote {
   public static Logger logger = Logger.getLogger(AvroraMote.class);
 
   private MoteInterfaceHandler moteInterfaceHandler;
@@ -90,7 +89,8 @@ public abstract class AvroraMote extends AbstractEmulatedMote implements Watchpo
   private boolean stopNextInstruction = false;
 
   private Sensor[] sensors;
-  
+  private FlashMemory[] flashMemory;
+
   public AvroraMote(Simulation simulation, MoteType type, PlatformFactory factory) {
     setSimulation(simulation);
     moteType = type;
@@ -116,16 +116,23 @@ public abstract class AvroraMote extends AbstractEmulatedMote implements Watchpo
 
       /* Get all sensors */
       Map<String, Sensor> sensorMap = new HashMap<>();
+      Map<String, FlashMemory> memoryMap = new HashMap<>();
       for (String name : getPlatform().getDeviceNames()) {
         Object obj = getPlatform().getDevice(name);
         if (avrora.sim.platform.sensors.Sensor.class.isAssignableFrom(obj.getClass())) {
           System.out.println("Found sensor: " + obj.getClass().getSimpleName());
           sensorMap.put(obj.getClass().getSimpleName(), new Sensor(this, new SensorWrapper((avrora.sim.platform.sensors.Sensor) obj)));
         }
+        if (avrora.sim.platform.memory.FlashMemory.class.isAssignableFrom(obj.getClass())) {
+          System.out.println("Found Memory: " + obj.getClass().getSimpleName());
+          memoryMap.put(obj.getClass().getSimpleName(), new FlashMemory(this, new MemoryWrapper((avrora.sim.platform.memory.FlashMemory) obj)));
+        }
+
       }
+      flashMemory = memoryMap.values().toArray(new FlashMemory[0]);
       sensors = sensorMap.values().toArray(new Sensor[0]);
 
-      
+
     } catch (Exception e) {
       logger.fatal("Error when initializing Avora mote: " + e.getMessage(), e);
       return false;
@@ -249,12 +256,16 @@ public abstract class AvroraMote extends AbstractEmulatedMote implements Watchpo
     return true;
   }
 
-
   @Override
   public Sensor[] getSensors() {
     return sensors;
   }
-  
+
+  @Override
+  public FlashMemory[] getFlashMemory() {
+    return flashMemory;
+  }
+
   @Override
   public Collection<Element> getConfigXML() {
     ArrayList<Element> config = new ArrayList<>();
@@ -293,7 +304,7 @@ public abstract class AvroraMote extends AbstractEmulatedMote implements Watchpo
 
     return config;
   }
-  
+
   public boolean setWatchpointConfigXML(Collection<Element> configXML, boolean visAvailable) {
     for (Element element : configXML) {
       if (element.getName().equals("breakpoint")) {

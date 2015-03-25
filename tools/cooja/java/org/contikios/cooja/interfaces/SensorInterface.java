@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2014, TU Braunschweig
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -13,7 +13,7 @@
  * 3. Neither the name of the Institute nor the names of its contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE INSTITUTE AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -28,7 +28,6 @@
  */
 package org.contikios.cooja.interfaces;
 
-import org.contikios.cooja.interfaces.sensor.Sensor;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
@@ -69,6 +68,7 @@ import org.contikios.cooja.interfaces.sensor.FileSensorFeederVisualizer;
 import org.contikios.cooja.interfaces.sensor.GaussianSensorFeederVisualizer;
 import org.contikios.cooja.interfaces.sensor.ManualSensorFeederVisualizer;
 import org.contikios.cooja.interfaces.sensor.RandomSensorFeederVisualizer;
+import org.contikios.cooja.interfaces.sensor.Sensor;
 import org.contikios.cooja.interfaces.sensor.Sensor.Channel;
 import org.jdom.Element;
 
@@ -116,7 +116,7 @@ public class SensorInterface extends MoteInterface implements HasQuickHelp {
     /* Create a SensorPanel for each sensor found on this mote */
     for (Sensor sensor : sensors) {
 
-      System.out.println("((Mote) sensormote).getSimulation().getCooja().getDesktopPane(): " + ((Mote) sensormote).getSimulation().getCooja().getDesktopPane());
+      //System.out.println("((Mote) sensormote).getSimulation().getCooja().getDesktopPane(): " + ((Mote) sensormote).getSimulation().getCooja().getDesktopPane());
 
       SensorPanel sensorPanel = new SensorPanel(((Mote) sensormote).getSimulation().getCooja(), sensor);
       sensorPanels.put(sensor.getName(), sensorPanel);
@@ -162,17 +162,17 @@ public class SensorInterface extends MoteInterface implements HasQuickHelp {
 
     return help;
   }
-   
+
   @Override
   public Collection<Element> getConfigXML() {
     List<Element> elements = new LinkedList<>();
     Element sensorElement;
 
     for (Sensor sensor : sensormote.getSensors()) {
-      
+
       sensorElement = new Element("sensor");
       sensorElement.addContent(sensor.getName());
-      
+
       // get set of all _used_ feeders
       Set<AbstractSensorFeeder> feederSet = new HashSet<>();
       for (Channel ch : sensor.getChannels()) {
@@ -196,21 +196,21 @@ public class SensorInterface extends MoteInterface implements HasQuickHelp {
 
       elements.add(sensorElement);
     }
-    
+
     return elements;
   }
 
   @Override
   public void setConfigXML(Collection<Element> configXML, boolean visAvailable) {
-    
+
     Map<String, AbstractSensorFeeder> feederMap = new HashMap<>();
-    
+
     // Iterate over each sensor
     for (Element element: configXML) {
       if (!element.getName().equals("sensor")) {
         continue;
       }
-      
+
       // get Sensor for this name
       String sensorName = element.getTextTrim();
       Sensor sensor = null;
@@ -221,7 +221,7 @@ public class SensorInterface extends MoteInterface implements HasQuickHelp {
         }
       }
       if (sensor == null) {
-        logger.error("Sensor " + sensor + " was not found and will not be configured");
+        logger.error("Sensor " + sensorName + " was not found and will not be configured");
         continue;
       }
 
@@ -255,7 +255,7 @@ public class SensorInterface extends MoteInterface implements HasQuickHelp {
 
         // setup feeder
         feeder.setConfigXML(feederElement);
-        
+
       }
 
       // restore config frame if it was visible
@@ -264,14 +264,14 @@ public class SensorInterface extends MoteInterface implements HasQuickHelp {
 //        sensorPanels.get(sensor.getName()).getConfigFrame().setVisible(true);
 //      }
     }
-    
+
     // Trigger update of feeder labels
     updateSensorInfo();
 
   }
 
   /**
-   * 
+   *
    */
   private class FeederComboboxEntry {
 
@@ -330,7 +330,7 @@ public class SensorInterface extends MoteInterface implements HasQuickHelp {
           setFeederDescription();
         }
       });
-      
+
       configureButton.addActionListener(new ActionListener() {
 
         @Override
