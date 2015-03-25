@@ -6,4 +6,4 @@
 	url = https://github.com/JelmerT/cc2538-bsl.git
 [submodule "tools/avrora"]
 	path = tools/avrora
-	url = https://github.com/ibr-cm/avrora.git
+	url = https://github.com/comawill/avrora.git
