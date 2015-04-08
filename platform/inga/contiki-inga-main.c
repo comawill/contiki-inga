@@ -440,6 +440,7 @@ init(void)
   rs232_init(RS232_PORT_0, INGA_USART_BAUD, USART_PARITY_NONE | USART_STOP_BITS_1 | USART_DATA_BITS_8);
   /* Redirect stdout to second port */
   rs232_redirect_stdout(RS232_PORT_0);
+  rs232_set_input(RS232_PORT_0, serial_line_input_byte);
 
   /* wait here to get a chance to see boot screen. */
   _delay_ms(200);
